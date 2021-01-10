@@ -28,6 +28,10 @@ def allowed_file(filename):
 filename = ''
 file_url = ''
 
+@app.route('/')
+def index_form():
+    return render_template('index.html')
+
 @app.route('/gps/')
 def upload_form():
     return render_template('upload.html')
@@ -37,10 +41,10 @@ def upload_file():
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
-            return render_template('message.html', message='No file part')
+            return render_template('message.html', message='Aucun fichier')
         file = request.files['file']
         if file.filename == '':
-            return render_template('message.html', message='No file selected for uploading')
+            return render_template('message.html', message='Aucun fichier sélectionné')
         if file and allowed_file(file.filename):
             global filename
             id_session = str(uuid.uuid4())
@@ -53,7 +57,7 @@ def upload_file():
             
             return redirect('/gps/gpx/')
         else:
-            return render_template('message.html', message='Allowed file type is sml')   
+            return render_template('message.html', message='Fichiers acceptés : SML')   
         
 @app.route('/gps/gpx/')
 def gpx_form():
@@ -62,7 +66,7 @@ def gpx_form():
         
 @app.route('/gps/download/<path:filename>')
 def download(filename):
-    return send_from_directory('../tmp', filename) 
+    return send_from_directory('../' + app.config['UPLOAD_FOLDER'], filename) 
         
         
     
