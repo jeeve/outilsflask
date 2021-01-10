@@ -60,9 +60,9 @@ def gpx_form():
     global filename
     return render_template('gpx.html', file_url="/gps/download/" + filename, filename=filename)        
         
-@app.route('/gps/download/<path:filename>')
+@app.route('/gps/download/<filename>')
 def download(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True) 
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename) 
         
         
     
