@@ -14,7 +14,7 @@ app = Flask(__name__)
 app.config.from_object('config')
 # To get one variable, tape app.config['MY_VARIABLE']
 
-UPLOAD_FOLDER = "tmp"
+UPLOAD_FOLDER = "/uploads"
 
 app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
