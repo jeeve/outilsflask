@@ -1,2 +1,2 @@
-web: gunicorn run:indexapp --timeout 6000
+web: gunicorn gpsapp:app --timeout 6000
 
