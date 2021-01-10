@@ -16,7 +16,7 @@ app.config.from_object('config')
 
 UPLOAD_FOLDER = "tmp"
 
-app.secret_key = "secret key"
+app.secret_key = "jvj"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
