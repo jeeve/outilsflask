@@ -58,7 +58,7 @@ def upload_file():
 @app.route('/gps/gpx/')
 def gpx_form():
     global filename
-    return render_template('gpx.html', file_url="/download/" + filename, filename=filename)        
+    return render_template('gpx.html', file_url="/gps/download/" + filename, filename=filename)        
         
 @app.route('/gps/download/<path:filename>')
 def download(filename):
