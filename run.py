@@ -8,7 +8,7 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 app = Flask(__name__)
 
-application = DispatcherMiddleware(index_app , {
+app.wsgi_app = DispatcherMiddleware(index_app , {
     '/gps': gps_app
 })
 
