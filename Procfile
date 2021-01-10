@@ -1,2 +1,2 @@
-web: gunicorn app --timeout 6000
-init: FLASK_APP=run.py flask init_db
+web: gunicorn run:app --timeout 6000
+
