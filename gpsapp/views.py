@@ -27,16 +27,16 @@ def allowed_file(filename):
 
 filename = ''
 file_url = ''
-
+"""
 @app.route('/')
 def index_form():
     return render_template('index.html')
-
-@app.route('/gps/')
+"""
+@app.route('/')
 def upload_form():
     return render_template('upload.html')
     
-@app.route('/gps/', methods=['POST'])
+@app.route('/', methods=['POST'])
 def upload_file():
     if request.method == 'POST':
         # check if the post request has the file part
@@ -59,12 +59,12 @@ def upload_file():
         else:
             return render_template('message.html', message='Fichiers acceptés : SML')   
         
-@app.route('/gps/gpx/')
+@app.route('/gpx/')
 def gpx_form():
     global filename
     return render_template('gpx.html', file_url="/gps/download/" + filename, filename=filename)        
         
-@app.route('/gps/download/<path:filename>')
+@app.route('/download/<path:filename>')
 def download(filename):
     return send_from_directory('../' + app.config['UPLOAD_FOLDER'], filename) 
         
