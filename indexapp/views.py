@@ -19,4 +19,9 @@ def index_form():
 @app.route('/')
 def index_form():
     return render_template('index.html')
-    
+
+@app.route('/cleartmp/')
+def clear_tmp():
+    while len(os.listdir('tmp')) > 0:
+        os.remove("tmp/" + os.listdir('tmp')[0])
+    return redirect('/')  
