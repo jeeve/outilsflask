@@ -1,1 +1,1 @@
-web: gunicorn indexapp.wsgi:application --timeout 6000
+web: gunicorn indexapp:application --timeout 6000
