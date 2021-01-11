@@ -1,1 +1,1 @@
-from run import application
+from run import app.wsgi_app as app
