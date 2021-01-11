@@ -5,12 +5,19 @@ from flask import Flask
 from gpsapp import app as gps_app
 from indexapp import app as index_app
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from werkzeug.serving import run_simple
 
 app = Flask(__name__)
 
-app.wsgi_app = DispatcherMiddleware(index_app , {
+application = DispatcherMiddleware(index_app , {
     '/gps': gps_app
 })
 
-if __name__ == "__main__":
-    app.run(debug=True)
+if __name__ == '__main__':
+    run_simple(
+        hostname='localhost',
+        port=5000,
+        application=application,
+        use_reloader=True,
+        use_debugger=True,
+        use_evalex=True)
