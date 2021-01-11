@@ -1,1 +1,1 @@
-web: gunicorn -b run:application --timeout 6000
+web: gunicorn --pythonpath  run:application --timeout 6000
