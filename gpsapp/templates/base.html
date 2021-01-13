@@ -1,21 +1,29 @@
 <!doctype html>
 <html lang="fr">
 
-<head>
-
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Convertisseur SML -> GPX">
-    <meta name="author" content="JULIEN JV">
-    <title>Convertisseur SML > GPX</title>
-
-</head>
+{% include 'header.html' %}
 
 <body>
+
+      <div class="page-container">
+         <!-- top navbar -->
+         {% include 'navbar.html' %}
+         <div class="container">
+            <div class="row row-offcanvas row-offcanvas-left">
+               <!-- sidebar -->
+               {% include 'sidebar.html' %}
+			   <!-- main area -->
+               <div class="col-xs-12 col-sm-12 col-md-9 fond">
+
 
 <h1>Convertisseur SML > GPX</h1>
 
 {% block content %}{% endblock %}
+
+</div>
+</div>
+</div>
+</div>
+
 </body>
 </html>
