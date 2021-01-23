@@ -55,7 +55,8 @@ def upload_file():
             
             filename = filename.replace('sml', 'gpx')
             
-            return redirect('/gps/gpx/')
+            #return redirect('/gps/gpx/')
+            return redirect('/gps/download/' + filename)
         else:
             return render_template('message.html', message='Fichiers acceptés : SML')   
         
