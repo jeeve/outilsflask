@@ -30,7 +30,7 @@ file_url = ''
 """
 @app.route('/')
 def index_form():
-    return render_template('index.html')
+   return render_template('index.html')
 """
 @app.route('/')
 def upload_form():
