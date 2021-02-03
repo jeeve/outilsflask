@@ -7,6 +7,7 @@ from flask import send_from_directory
 import uuid
 
 from suunto import sml2gpx
+from fit2gpx import parse_fit_to_gpx
 
 app = Flask(__name__)
 
@@ -20,7 +21,7 @@ app.secret_key = "jvj"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-ALLOWED_EXTENSIONS = set(['sml'])
+ALLOWED_EXTENSIONS = set(['fit', 'sml'])
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -48,17 +49,21 @@ def upload_file():
         if file and allowed_file(file.filename):
             global filename
             id_session = str(uuid.uuid4())
-            filename = id_session + ".gpx" #secure_filename(file.filename)
+            filename = id_session + file.filename[-4:] 
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             
-            sml2gpx(UPLOAD_FOLDER + '/' + filename)
-            
-            filename = filename.replace('sml', 'gpx')
-            
+            if filename[-3:].lower() == 'sml':
+                sml2gpx(UPLOAD_FOLDER + '/' + filename)
+                filename = filename.replace('sml', 'gpx')
+                
+            if filename[-3:].lower() == 'fit':
+                parse_fit_to_gpx(UPLOAD_FOLDER + '/' + filename)
+                filename = filename.replace('fit', 'gpx')
+                
             #return redirect('/gps/gpx/')
             return redirect('/gps/download/' + filename)
         else:
-            return render_template('message.html', message='Fichiers acceptés : SML')   
+            return render_template('message.html', message='Fichiers acceptés : FIT, SML')   
         
 @app.route('/gpx/')
 def gpx_form():

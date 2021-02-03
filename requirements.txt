@@ -24,3 +24,5 @@ numpy
 matplotlib
 pandas
 windrose
+gpxpy
+fitparse 

@@ -50,4 +50,8 @@ def parse_fit_to_gpx(fitname) -> gpxpy.gpx.GPX:
 
             gpxSegment.points.append(gpxTrackPoint)
 
-    return gpx
+    filename = fitname.replace('fit', 'gpx')    
+    output_file = open(filename, 'x')
+    output_file.write(gpx.to_xml())
+
+    output_file.close()
