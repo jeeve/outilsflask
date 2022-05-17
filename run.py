@@ -3,11 +3,13 @@
 
 from gpsapp import app as gps_app
 from indexapp import app as index_app
+from sessionsapp import app as sessions_app
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.serving import run_simple
 
 application = DispatcherMiddleware(index_app , {
-    '/gps': gps_app
+    '/gps': gps_app,
+    '/sessions': sessions_app
 })
 
 if __name__ == '__main__':
