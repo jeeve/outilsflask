@@ -29,14 +29,30 @@ def index():
     return Response(output.getvalue(), mimetype='image/png')
     
 def create_plot_date(): 
+
     fig = Figure()
     fig.set_size_inches(10, 7, forward=True)
     fig.suptitle("Vitesse 100m")
 
     axis = fig.add_subplot(1, 1, 1)
-    xs = np.array([4,7,9])
-    ys = np.array([40,20,5])
-        
-    axis.plot(xs, ys)
+
+    df = pd.read_csv('https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv', usecols=['Date', 'Pratique', 'V 100m K72'])
+    df_windfoil = df[df['Pratique'].eq('Windfoil')]
+    df_windfoil["Date"] = pd.to_datetime(df_windfoil["Date"], format='%m/%d/%Y')
+    df_windfoil["Date"] = (df_windfoil["Date"] - pd.to_datetime('1/1/2019', format='%m/%d/%Y')).dt.days
+    df_windfoil = df_windfoil.dropna()
+
+    X = df_windfoil['Date']
+    y = df_windfoil['V 100m K72']
+
+    axis.plot(X, y, '.b')
+
+    X_b = np.c_[np.ones((X.shape[0], 1)), X]
+    theta_best = np.linalg.inv(X_b.T @ X_b) @ X_b.T @ y
+    X_new = np.array([[0], [2000]])
+    X_new_b = np.c_[np.ones((2, 1)), X_new]
+    y_predict = X_new_b @ theta_best
+
+    axis.plot(X_new, y_predict, "r-")
 
     return fig 
