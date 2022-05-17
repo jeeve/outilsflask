@@ -32,7 +32,7 @@ def create_plot_date():
 
     fig = Figure()
     fig.set_size_inches(10, 7, forward=True)
-    fig.suptitle("Vitesse 100m")
+    fig.suptitle("Vitesse Windfoil 100m depuis le 01/01/2019")
 
     axis = fig.add_subplot(1, 1, 1)
 
