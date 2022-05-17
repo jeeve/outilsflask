@@ -32,7 +32,7 @@ def create_plot_date():
 
     fig = Figure()
     fig.set_size_inches(10, 7, forward=True)
-    fig.suptitle("Vitesse Windfoil 100m depuis le 01/01/2019")
+    fig.suptitle(" Vitesse Windfoil")
 
     axis = fig.add_subplot(1, 1, 1)
 
@@ -54,5 +54,8 @@ def create_plot_date():
     y_predict = X_new_b @ theta_best
 
     axis.plot(X_new, y_predict, "r-")
+
+    axis.set_ylabel('Vitesse 100m (kts)')
+    axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
 
     return fig 
