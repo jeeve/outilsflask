@@ -1,7 +1,5 @@
 absl-py==1.0.0
 astunparse==1.6.3
-cachelib==0.4.1
-cachetools==5.1.0
 certifi==2021.10.8
 charset-normalizer==2.0.12
 click==8.0.3
