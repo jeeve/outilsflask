@@ -25,4 +25,5 @@ matplotlib
 pandas
 windrose
 gpxpy
-fitparse 
+fitparse
+tensorflow 
