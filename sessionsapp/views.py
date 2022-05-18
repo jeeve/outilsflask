@@ -112,18 +112,14 @@ def plot_reseau_neurones():
                         verbose=0)
 
     xmin = train_features['Date'].min()
-    xmax = 2000 #train_features['Date'].max()
+    xmax = train_features['Date'].max() + 1000
     x = tf.linspace(xmin, xmax, 1000)
     y = model.predict(x)
 
     axis.set_xlim([xmin, xmax])
-
     axis.scatter(train_features['Date'], train_labels, label='Data')
-
     axis.plot(x, y, color='k', label='Predictions')
-
     axis.set_ylabel('Vitesse 100m (kts)')
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
-    plt.legend()
 
     return fig
