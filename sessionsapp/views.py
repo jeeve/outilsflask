@@ -113,9 +113,6 @@ def plot_reseau_neurones():
                         callbacks=[keras.callbacks.EarlyStopping(patience=10, restore_best_weights=True)],
                         verbose=0)
 
-    axis.set_ylabel('Vitesse 100m (kts)')
-    axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
-
     xmin = train_features['Date'].min()
     xmax = 2000 #train_features['Date'].max()
     x = tf.linspace(xmin, xmax, 1000)
