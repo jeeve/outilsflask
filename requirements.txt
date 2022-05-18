@@ -26,4 +26,3 @@ pandas
 windrose
 gpxpy
 fitparse
-tensorflow
