@@ -128,4 +128,4 @@ def plot_reseau_neurones():
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
     plt.legend()
 
-    return fig 
+    return fig
