@@ -97,10 +97,8 @@ def plot_reseau_neurones():
     train_labels = train_features.pop('V 100m K72')
 
     date_heure = np.array(train_features['Date'])
-    date_heure_normalizer = tf.keras.layers.Normalization(input_shape=[1,], axis=None)
-    date_heure_normalizer.adapt(date_heure)
-
-    model = tf.keras.Sequential([date_heure_normalizer,
+ 
+    model = tf.keras.Sequential([keras.layers.BatchNormalization(),
                                 keras.layers.Dense(64, activation='relu'),
                     #           keras.layers.Dense(64, activation='relu'),                             
                                 keras.layers.Dense(1)])
