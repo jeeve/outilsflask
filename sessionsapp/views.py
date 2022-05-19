@@ -17,7 +17,7 @@ matplotlib.rcParams['timezone'] = 'Europe/Paris'
 app = Flask(__name__)
 
 # Config options - Make sure you created a 'config.py' file.
-app.config.from_object('config')
+# app.config.from_object('config')
 # To get one variable, tape app.config['MY_VARIABLE']
 
 @app.route('/ia/regressionlineaire')
@@ -88,19 +88,13 @@ def plot_reseau_neurones():
     import tensorflow as tf
     from tensorflow import keras
 
-    dataset = df_windfoil
+    df_windfoil["Date"] = df_windfoil["Date"].astype(float, errors = 'raise')
+    train_dataset = df_windfoil.sample(frac=0.8, random_state=0)
+    train_features = train_dataset.copy()
+    train_labels = train_dataset.pop('V 100m K72')
 
-    train_dataset = dataset.sample(frac=0.8, random_state=0)
-
-    train_features = dataset.copy()
-
-    train_labels = train_features.pop('V 100m K72')
-
-    date_heure = np.array(train_features['Date'])
- 
-    model = tf.keras.Sequential([keras.layers.BatchNormalization(),
-                                keras.layers.Dense(64, activation='relu'),
-                    #           keras.layers.Dense(64, activation='relu'),                             
+    model = tf.keras.Sequential([keras.layers.LayerNormalization(),
+                                keras.layers.Dense(64, activation='relu'),                             
                                 keras.layers.Dense(1)])
 
     model.compile(loss='mean_absolute_error', optimizer=tf.keras.optimizers.Adam(0.1))
