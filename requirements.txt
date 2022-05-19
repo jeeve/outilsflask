@@ -4,8 +4,8 @@ astroid==1.5.3
 astunparse==1.6.3
 attrs==21.4.0
 aws-lambda-builders==1.16.0
-aws-sam-cli==1.50.0
-aws-sam-translator==1.45.0
+aws-sam-cli
+aws-sam-translator
 backports.zoneinfo==0.2.1
 binaryornot==0.4.4
 boto3==1.23.3
