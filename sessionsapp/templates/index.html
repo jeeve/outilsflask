@@ -1,7 +1,69 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block content %}
 
-{% block content %}
+<style>
+  .chart {
+    width: 100%;
+    min-height: 400px;
+  }
 
-          
+  .loader-container {
+    position: relative;
+    display: flex;
+    flex-direction: column; /* direction d'affichage verticale */
+    justify-content: center; /* alignement vertical */
+  }
+
+  .loader {
+    height: 50px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+</style>
+<br />
+<br />
+<div class="row">
+  <div class="col-xs-12 col-sm-1 fond"></div>
+  <div class="col-xs-12 col-sm-10 fond">
+    <div id="regression1" class="fond"></div>
+    <p class="legende">
+      <a
+        target="_bank"
+        href="https://colab.research.google.com/drive/1uQXnXweKwFYDEXRFHhVaowr5-HcVUg4u?usp=sharing"
+        >Régression linéaire par équation normale</a
+      >
+    </p>
+
+    <br>
+    <br>
+
+    <div id="regression2" class="fond"></div>
+    <p class="legende">
+      <a
+        target="_bank"
+        href="https://colab.research.google.com/drive/1uQXnXweKwFYDEXRFHhVaowr5-HcVUg4u?usp=sharing"
+        >Régression MPC</a
+      >
+    </p>
+  </div>
+</div>
+
+<script>
+  function imageChargee(elt) {
+    jQuery(elt).parent().prev().css("display", "none");
+    jQuery(elt).parent().prev().prev().css("display", "none");
+  }
+
+  $(document).ready(function () {
+    $("#regression1").html(
+      '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/regressionlineaire">' +
+        '<img onload="imageChargee(this)" src="ia/regressionlineaire" class="img-responsive ombre-image "></a>'
+    );
+    $("#regression2").html(
+      '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/reseauneurones">' +
+        '<img onload="imageChargee(this)" src="ia/reseauneurones" class="img-responsive ombre-image "></a>'
+    );
+  });
+</script>
 
 {% endblock %}

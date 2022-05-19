@@ -20,6 +20,10 @@ app = Flask(__name__)
 # app.config.from_object('config')
 # To get one variable, tape app.config['MY_VARIABLE']
 
+@app.route('/ia')
+def upload_form():
+    return render_template('index.html')
+
 @app.route('/ia/regressionlineaire')
 def regression_lineaire():
     fig = plot_regression_lineaire()
@@ -99,11 +103,11 @@ def plot_reseau_neurones():
 
     model.compile(loss='mean_absolute_error', optimizer=tf.keras.optimizers.Adam(0.1))
 
-    history = model.fit(train_features['Date'], 
-                        train_labels, validation_split=0.2,
-                        epochs=10000, 
-                        callbacks=[keras.callbacks.EarlyStopping(patience=10, restore_best_weights=True)],
-                        verbose=0)
+    model.fit(train_features['Date'], 
+        train_labels, validation_split=0.2,
+        epochs=10000, 
+        callbacks=[keras.callbacks.EarlyStopping(patience=10, restore_best_weights=True)],
+        verbose=0)
 
     xmin = train_features['Date'].min()
     xmax = train_features['Date'].max() + 1000
