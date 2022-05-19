@@ -93,7 +93,7 @@ def plot_reseau_neurones():
     train_features = train_dataset.copy()
     train_labels = train_dataset.pop('V 100m K72')
 
-    model = tf.keras.Sequential([keras.layers.LayerNormalization(),
+    model = tf.keras.Sequential([keras.layers.BatchNormalization(),
                                 keras.layers.Dense(64, activation='relu'),                             
                                 keras.layers.Dense(1)])
 
@@ -111,8 +111,8 @@ def plot_reseau_neurones():
     y = model.predict(x)
 
     axis.set_xlim([xmin, xmax])
-    axis.scatter(train_features['Date'], train_labels, label='Data')
-    axis.plot(x, y, color='k', label='Predictions')
+    axis.plot(train_features['Date'], train_labels, '.b')
+    axis.plot(x, y, 'r-', label='Predictions')
     axis.set_ylabel('Vitesse 100m (kts)')
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
 
