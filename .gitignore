@@ -1,5 +1,6 @@
 env/
 venv/
+venv0/
 *.pyc
 __pycache__
 fbapp/static/tmp/*.jpg
