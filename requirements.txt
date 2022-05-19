@@ -1,6 +1,4 @@
-tensorflow==2.2.0
-tensorflow-estimator==2.2.0
-Keras-Preprocessing==1.1.2
+tensorflow-cpu==2.2.0
 Flask==0.12.2
 Flask-Testing==0.6.2
 gunicorn==19.7.1
