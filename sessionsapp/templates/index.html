@@ -18,36 +18,33 @@
 
 <br />
 <br />
+<h2>Régression linéaire par équation normale</h2>
+<br />
 <div class="row">
   <div class="col-xs-12 col-sm-1 fond"></div>
   <div class="col-xs-12 col-sm-10 fond">
     <div id="regression1" class="fond"></div>
-    <p class="legende">
-      <a
-        target="_bank"
-        href="https://colab.research.google.com/drive/1uQXnXweKwFYDEXRFHhVaowr5-HcVUg4u?usp=sharing"
-        >Régression linéaire par équation normale</a>
-    </p>
   </div>
 </div>
 
 <br />
+<br />
+<br />
+<h2>Régression avec perceptron multicouche</h2>
 <br />
 <div class="row">
   <div class="col-xs-12 col-sm-1 fond"></div>
   <div class="col-xs-12 col-sm-10 fond">
     <div id="regression2" class="fond"></div>
-    <p class="legende">
-      <a
-        target="_bank"
-        href="https://colab.research.google.com/drive/1uQXnXweKwFYDEXRFHhVaowr5-HcVUg4u?usp=sharing"
-        >Régression avec perceptron multicouche</a>
-    </p>
+    <br />
+    <label>Nombre de neurones par couche :</label>
+    <input id="nbneuronescouche" type="text" size="6" value="64" />
+    <button id="calculer" type="button">Calculer</button>
   </div>
 </div>
 
-<br>
-<br>
+<br />
+<br />
 
 <script>
   function imageChargee(elt) {
@@ -64,6 +61,17 @@
       '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/reseauneurones">' +
         '<img onload="imageChargee(this)" src="ia/reseauneurones" class="img-responsive ombre-image "></a>'
     );
+
+    $("#calculer").click(function () {
+      $("#regression2").html(
+        '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/reseauneurones?nbneuronescouche=' +
+          $("#nbneuronescouche").val() +
+          ' ">' +
+          '<img onload="imageChargee(this)" src="ia/reseauneurones?nbneuronescouche=' +
+          $("#nbneuronescouche").val() +
+          '" class="img-responsive ombre-image "></a>'
+      );
+    });
   });
 </script>
 

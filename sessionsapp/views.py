@@ -37,7 +37,10 @@ def regression_lineaire():
     
 @app.route('/ia/reseauneurones')
 def reseau_neurones():
-    fig = plot_reseau_neurones()
+    nbneuronescouche = 64
+    if request.args.get('nbneuronescouche') != None:
+        nbneuronescouche = request.args.get('nbneuronescouche', default=64, type=int)  
+    fig = plot_reseau_neurones(nbneuronescouche)
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
@@ -76,7 +79,7 @@ def plot_regression_lineaire():
 
     return fig 
 
-def plot_reseau_neurones(): 
+def plot_reseau_neurones(nbneuronescouche): 
 
     fig = Figure()
     fig.set_size_inches(10, 7, forward=True)
@@ -104,8 +107,8 @@ def plot_reseau_neurones():
     train_labels = train_dataset.pop('V 100m K72')
 
     model = tf.keras.Sequential([keras.layers.BatchNormalization(),
-                                keras.layers.Dense(64, activation='relu'),
-                                keras.layers.Dense(64, activation='relu'),                             
+                                keras.layers.Dense(nbneuronescouche, activation='relu'),
+                                keras.layers.Dense(nbneuronescouche, activation='relu'),                             
                                 keras.layers.Dense(1)])
 
     model.compile(loss='mean_absolute_error', optimizer=tf.keras.optimizers.Adam(0.1))
