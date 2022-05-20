@@ -59,12 +59,14 @@ def plot_regression_lineaire():
 
     X_b = np.c_[np.ones((X.shape[0], 1)), X]
     theta_best = np.linalg.inv(X_b.T @ X_b) @ X_b.T @ y
-    X_new = np.array([[0], [2000]])
+    xmin = df_windfoil["Date"].min()
+    xmax = df_windfoil["Date"].max() + 1000
+    X_new = np.array([[xmin], [xmax]])
     X_new_b = np.c_[np.ones((2, 1)), X_new]
     y_predict = X_new_b @ theta_best
 
+ #   axis.set_xlim([xmin, xmax])
     axis.plot(X_new, y_predict, "r-")
-
     axis.set_ylabel('Vitesse 100m (kts)')
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
 
@@ -98,6 +100,7 @@ def plot_reseau_neurones():
     train_labels = train_dataset.pop('V 100m K72')
 
     model = tf.keras.Sequential([keras.layers.BatchNormalization(),
+                                keras.layers.Dense(64, activation='relu'),
                                 keras.layers.Dense(64, activation='relu'),                             
                                 keras.layers.Dense(1)])
 
@@ -114,7 +117,7 @@ def plot_reseau_neurones():
     x = tf.linspace(xmin, xmax, 1000)
     y = model.predict(x)
 
-    axis.set_xlim([xmin, xmax])
+#    axis.set_xlim([xmin, xmax])
     axis.plot(train_features['Date'], train_labels, '.b')
     axis.plot(x, y, 'r-', label='Predictions')
     axis.set_ylabel('Vitesse 100m (kts)')
