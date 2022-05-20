@@ -12,3 +12,4 @@ windrose
 gpxpy
 fitparse
 matplotlib
+bokeh
