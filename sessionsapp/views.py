@@ -12,6 +12,10 @@ from dateutil.relativedelta import relativedelta
 import matplotlib.dates as mdates
 import numpy as np
 
+from bokeh.embed import components
+from bokeh.plotting import figure
+from bokeh.resources import INLINE
+
 matplotlib.rcParams['timezone'] = 'Europe/Paris'
 
 app = Flask(__name__)
@@ -65,7 +69,7 @@ def plot_regression_lineaire():
     X_new_b = np.c_[np.ones((2, 1)), X_new]
     y_predict = X_new_b @ theta_best
 
- #   axis.set_xlim([xmin, xmax])
+
     axis.plot(X_new, y_predict, "r-")
     axis.set_ylabel('Vitesse 100m (kts)')
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
@@ -125,30 +129,20 @@ def plot_reseau_neurones():
 
     return fig
 
-from bokeh.embed import components
-from bokeh.plotting import figure
-from bokeh.resources import INLINE
-
 @app.route('/bokeh')
 def bokeh():
 
-    # init a basic bar chart:
-    # http://bokeh.pydata.org/en/latest/docs/user_guide/plotting.html#bars
-    fig = figure(plot_width=600, plot_height=600)
-    fig.vbar(
-        x=[1, 2, 3, 4],
-        width=0.5,
-        bottom=0,
-        top=[1.7, 2.2, 4.6, 3.9],
-        color='navy'
-    )
+    p = figure(plot_width=600, plot_height=600, x_axis_label="x", y_axis_label="y", active_scroll ="wheel_zoom")
+    x = [1, 2, 3, 4, 5]
+    y = [4, 5, 5, 7, 2]
+    p.circle(x, y)
 
     # grab the static resources
     js_resources = INLINE.render_js()
     css_resources = INLINE.render_css()
 
     # render template
-    script, div = components(fig)
+    script, div = components(p)
     html = render_template(
         'bokeh.html',
         plot_script=script,
@@ -156,4 +150,5 @@ def bokeh():
         js_resources=js_resources,
         css_resources=css_resources,
     )
+
     return html
