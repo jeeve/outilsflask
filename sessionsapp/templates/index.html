@@ -37,7 +37,9 @@
   <div class="col-xs-12 col-sm-10 fond">
     <div id="regression2" class="fond"></div>
     <br />
-    <label>Nombre de neurones par couche :</label>
+    <label>Nombre de couches cachées</label>
+    <input id="nbcouches" type="text" size="6" value="2" />
+    <label>Nombre de neurones par couche</label>
     <input id="nbneuronescouche" type="text" size="6" value="64" />
     <button id="calculer" type="button">Calculer</button>
   </div>
@@ -64,10 +66,14 @@
 
     $("#calculer").click(function () {
       $("#regression2").html(
-        '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/reseauneurones?nbneuronescouche=' +
+        '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/reseauneurones?nbcouches=' +
+          $("#nbcouches").val() +
+          "&nbneuronescouche=" +
           $("#nbneuronescouche").val() +
           ' ">' +
-          '<img onload="imageChargee(this)" src="ia/reseauneurones?nbneuronescouche=' +
+          '<img onload="imageChargee(this)" src="ia/reseauneurones?nbcouches=' +
+          $("#nbcouches").val() +
+          "&nbneuronescouche=" +
           $("#nbneuronescouche").val() +
           '" class="img-responsive ombre-image "></a>'
       );

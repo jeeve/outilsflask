@@ -37,10 +37,9 @@ def regression_lineaire():
     
 @app.route('/ia/reseauneurones')
 def reseau_neurones():
-    nbneuronescouche = 64
-    if request.args.get('nbneuronescouche') != None:
-        nbneuronescouche = request.args.get('nbneuronescouche', default=64, type=int)  
-    fig = plot_reseau_neurones(nbneuronescouche)
+    nbcouches = request.args.get('nbcouches', default=2, type=int)  
+    nbneuronescouche = request.args.get('nbneuronescouche', default=64, type=int)  
+    fig = plot_reseau_neurones(nbcouches, nbneuronescouche)
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
@@ -79,7 +78,7 @@ def plot_regression_lineaire():
 
     return fig 
 
-def plot_reseau_neurones(nbneuronescouche): 
+def plot_reseau_neurones(nbcouches, nbneuronescouche): 
 
     fig = Figure()
     fig.set_size_inches(10, 7, forward=True)
@@ -106,10 +105,13 @@ def plot_reseau_neurones(nbneuronescouche):
     train_features = train_dataset.copy()
     train_labels = train_dataset.pop('V 100m K72')
 
-    model = tf.keras.Sequential([keras.layers.BatchNormalization(),
-                                keras.layers.Dense(nbneuronescouche, activation='relu'),
-                                keras.layers.Dense(nbneuronescouche, activation='relu'),                             
-                                keras.layers.Dense(1)])
+    couches = [keras.layers.BatchNormalization()]
+    for x in range(nbcouches):
+        couches.append(keras.layers.Dense(nbneuronescouche, activation='relu'))
+        couches.append(keras.layers.Dense(nbneuronescouche, activation='relu'))
+    couches.append(keras.layers.Dense(1))
+
+    model = tf.keras.Sequential(couches)
 
     model.compile(loss='mean_absolute_error', optimizer=tf.keras.optimizers.Adam(0.1))
 
