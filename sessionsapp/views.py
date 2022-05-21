@@ -75,7 +75,7 @@ def plot_regression_lineaire(label):
 
 
     axis.plot(X_new, y_predict, "r-")
-    axis.set_ylabel(label + ' (kts)')
+    axis.set_ylabel(label)
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
 
     return fig 
@@ -131,7 +131,7 @@ def plot_reseau_neurones(label, nbcouches, nbneuronescouche):
 #    axis.set_xlim([xmin, xmax])
     axis.plot(train_features['Date'], train_labels, '.b')
     axis.plot(x, y, 'r-', label='Predictions')
-    axis.set_ylabel(label + ' (kts)')
+    axis.set_ylabel(label)
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
 
     return fig
