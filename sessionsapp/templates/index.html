@@ -18,6 +18,14 @@
 
 <br />
 <br />
+<label>Vitesse</label>
+<select id="label">
+  <option value="V 100m K72">V 100m K72</option>
+  <option value="VMax K72 (noeuds)">VMax K72</option>
+</select>
+
+<br />
+<br />
 <h2>Régression linéaire par équation normale</h2>
 <br />
 <div class="row">
@@ -54,30 +62,48 @@
     jQuery(elt).parent().prev().prev().css("display", "none");
   }
 
-  $(document).ready(function () {
+  function calculeRegression1() {
     $("#regression1").html(
-      '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/regressionlineaire">' +
-        '<img onload="imageChargee(this)" src="ia/regressionlineaire" class="img-responsive ombre-image "></a>'
+      '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/regressionlineaire?label=' +
+        $("#label").val() +
+        '">' +
+        '<img onload="imageChargee(this)" src="ia/regressionlineaire?label=' +
+        $("#label").val() +
+        '" class="img-responsive ombre-image "></a>'
     );
-    $("#regression2").html(
-      '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/reseauneurones">' +
-        '<img onload="imageChargee(this)" src="ia/reseauneurones" class="img-responsive ombre-image "></a>'
-    );
+  }
 
-    $("#calculer").click(function () {
-      $("#regression2").html(
-        '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/reseauneurones?nbcouches=' +
-          $("#nbcouches").val() +
-          "&nbneuronescouche=" +
-          $("#nbneuronescouche").val() +
-          ' ">' +
-          '<img onload="imageChargee(this)" src="ia/reseauneurones?nbcouches=' +
-          $("#nbcouches").val() +
-          "&nbneuronescouche=" +
-          $("#nbneuronescouche").val() +
-          '" class="img-responsive ombre-image "></a>'
-      );
-    });
+  function calculeRegression2() {
+    $("#regression2").html(
+      '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/reseauneurones?label=' +
+        $("#label").val() +
+        "&nbcouches=" +
+        $("#nbcouches").val() +
+        "&nbneuronescouche=" +
+        $("#nbneuronescouche").val() +
+        ' ">' +
+        '<img onload="imageChargee(this)" src="ia/reseauneurones?label=' +
+        $("#label").val() +
+        "&nbcouches=" +
+        $("#nbcouches").val() +
+        "&nbneuronescouche=" +
+        $("#nbneuronescouche").val() +
+        '" class="img-responsive ombre-image "></a>'
+    );
+  }
+
+  $(document).ready(function () {
+    calculeRegression1();
+    calculeRegression2();
+  });
+
+  $("#label").change(function () {
+    calculeRegression1();
+    calculeRegression2();
+  });
+
+  $("#calculer").click(function () {
+    calculeRegression2();
   });
 </script>
 

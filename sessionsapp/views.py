@@ -30,21 +30,23 @@ def upload_form():
 
 @app.route('/ia/regressionlineaire')
 def regression_lineaire():
-    fig = plot_regression_lineaire()
+    label = request.args.get('label', default='V 100m K72', type=str) 
+    fig = plot_regression_lineaire(label)
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
     
 @app.route('/ia/reseauneurones')
 def reseau_neurones():
+    label = request.args.get('label', default='V 100m K72', type=str) 
     nbcouches = request.args.get('nbcouches', default=2, type=int)  
     nbneuronescouche = request.args.get('nbneuronescouche', default=64, type=int)  
-    fig = plot_reseau_neurones(nbcouches, nbneuronescouche)
+    fig = plot_reseau_neurones(label, nbcouches, nbneuronescouche)
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
 
-def plot_regression_lineaire(): 
+def plot_regression_lineaire(label): 
 
     fig = Figure()
     fig.set_size_inches(10, 7, forward=True)
@@ -52,14 +54,14 @@ def plot_regression_lineaire():
 
     axis = fig.add_subplot(1, 1, 1)
 
-    df = pd.read_csv('https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv', usecols=['Date', 'Pratique', 'V 100m K72'])
+    df = pd.read_csv('https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv', usecols=['Date', 'Pratique', label])
     df_windfoil = df[df['Pratique'].eq('Windfoil')]
     df_windfoil["Date"] = pd.to_datetime(df_windfoil["Date"], format='%m/%d/%Y')
     df_windfoil["Date"] = (df_windfoil["Date"] - pd.to_datetime('1/1/2019', format='%m/%d/%Y')).dt.days
     df_windfoil = df_windfoil.dropna()
 
     X = df_windfoil['Date']
-    y = df_windfoil['V 100m K72']
+    y = df_windfoil[label]
 
     axis.plot(X, y, '.b')
 
@@ -73,12 +75,12 @@ def plot_regression_lineaire():
 
 
     axis.plot(X_new, y_predict, "r-")
-    axis.set_ylabel('Vitesse 100m (kts)')
+    axis.set_ylabel(label + ' (kts)')
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
 
     return fig 
 
-def plot_reseau_neurones(nbcouches, nbneuronescouche): 
+def plot_reseau_neurones(label, nbcouches, nbneuronescouche): 
 
     fig = Figure()
     fig.set_size_inches(10, 7, forward=True)
@@ -86,14 +88,14 @@ def plot_reseau_neurones(nbcouches, nbneuronescouche):
 
     axis = fig.add_subplot(1, 1, 1)
 
-    df = pd.read_csv('https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv', usecols=['Date', 'Pratique', 'V 100m K72'])
+    df = pd.read_csv('https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv', usecols=['Date', 'Pratique', label])
     df_windfoil = df[df['Pratique'].eq('Windfoil')]
     df_windfoil["Date"] = pd.to_datetime(df_windfoil["Date"], format='%m/%d/%Y')
     df_windfoil["Date"] = (df_windfoil["Date"] - pd.to_datetime('1/1/2019', format='%m/%d/%Y')).dt.days
     df_windfoil = df_windfoil.dropna()
 
     X = df_windfoil['Date']
-    y = df_windfoil['V 100m K72']
+    y = df_windfoil[label]
 
     axis.plot(X, y, '.b')
 
@@ -103,7 +105,7 @@ def plot_reseau_neurones(nbcouches, nbneuronescouche):
     df_windfoil["Date"] = df_windfoil["Date"].astype(float, errors = 'raise')
     train_dataset = df_windfoil.sample(frac=0.8, random_state=0)
     train_features = train_dataset.copy()
-    train_labels = train_dataset.pop('V 100m K72')
+    train_labels = train_dataset.pop(label)
 
     couches = [keras.layers.BatchNormalization()]
     for x in range(nbcouches):
@@ -129,7 +131,7 @@ def plot_reseau_neurones(nbcouches, nbneuronescouche):
 #    axis.set_xlim([xmin, xmax])
     axis.plot(train_features['Date'], train_labels, '.b')
     axis.plot(x, y, 'r-', label='Predictions')
-    axis.set_ylabel('Vitesse 100m (kts)')
+    axis.set_ylabel(label + ' (kts)')
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
 
     return fig
