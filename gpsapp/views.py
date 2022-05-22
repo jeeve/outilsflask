@@ -6,8 +6,8 @@ from werkzeug.utils import secure_filename
 from flask import send_from_directory
 import uuid
 
-from suunto import sml2gpx
-from fit2gpx import parse_fit_to_gpx
+from gpsapp.suunto import sml2gpx
+from gpsapp.fit2gpx import parse_fit_to_gpx
 
 app = Flask(__name__)
 
