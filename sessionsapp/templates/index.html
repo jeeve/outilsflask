@@ -21,15 +21,12 @@
 <h2>Windfoil</h2>
 <p>{{ nb_points }} points</p>
 
-
 <select id="label">
   <option value="V 100m K72">V 100m</option>
   <option value="VMax K72 (noeuds)">V Max</option>
   <option value="Distance (km)">Distance</option>
 </select>
 <br />
-
-
 
 <br />
 <br />
@@ -52,11 +49,17 @@
   <div class="col-xs-12 col-sm-10 fond">
     <div id="regression2" class="fond"></div>
     <br />
-    <label>Nombre de couches cachées</label>
-    <input id="nbcouches" type="text" size="6" value="2" />
-    <label>Nombre de neurones par couche</label>
-    <input id="nbneuronescouche" type="text" size="6" value="64" />
-    <button id="calculer" type="button">Calculer</button>
+    <table>
+      <tr>
+        <td><p>Nombre de couches cachées</p></td>
+        <td><input id="nbcouches" type="text" size="6" value="2" /></td>
+        <td><button id="calculer" type="button">Calculer</button></td>
+      </tr>
+      <tr>
+        <td><p>Nombre de neurones par couche</p></td>
+        <td><input id="nbneuronescouche" type="text" size="6" value="64" /></td>
+      </tr>
+    </table>
   </div>
 </div>
 
