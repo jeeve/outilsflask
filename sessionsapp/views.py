@@ -26,7 +26,10 @@ app = Flask(__name__)
 
 @app.route('/ia')
 def upload_form():
-    return render_template('index.html')
+    df = pd.read_csv('https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv', usecols=['Date', 'Pratique', 'V 100m K72', 'VMax K72 (noeuds)', 'Distance (km)'])
+    df_windfoil = df[df['Pratique'].eq('Windfoil')]
+    nb_points = df_windfoil.shape[0]
+    return render_template('index.html', nb_points=nb_points)
 
 @app.route('/ia/regressionlineaire')
 def regression_lineaire():
@@ -50,7 +53,7 @@ def plot_regression_lineaire(label):
 
     fig = Figure()
     fig.set_size_inches(10, 7, forward=True)
-    fig.suptitle("Vitesse Windfoil")
+    #fig.suptitle("Vitesse Windfoil")
 
     axis = fig.add_subplot(1, 1, 1)
 
@@ -84,7 +87,7 @@ def plot_reseau_neurones(label, nbcouches, nbneuronescouche):
 
     fig = Figure()
     fig.set_size_inches(10, 7, forward=True)
-    fig.suptitle("Vitesse Windfoil")
+    #fig.suptitle("Vitesse Windfoil")
 
     axis = fig.add_subplot(1, 1, 1)
 
