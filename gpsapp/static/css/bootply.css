@@ -1,5 +1,5 @@
 body {
-  padding-top: 51px;  
+  padding-top: 51px;
 }
 .text-center {
   padding-top: 20px;
@@ -7,137 +7,134 @@ body {
 .col-xs-12 {
   background-color: #fff;
 }
+
+.navbar.navbar-default.navbar-fixed-top .container {
+  left: 0;
+  padding-left: 20px;
+  position: absolute;
+  width: 100%;
+}
+#bouton-menu {
+  left: 20px;
+  width: 100px;
+  visibility: hidden;
+}
+.navbar-header {
+  position: absolute;
+  left: 300px;
+}
+#bouton-bas-page {
+  margin-right: 60px;
+}
+#bouton-haut-page {
+  float: right;
+  margin-right: 10px;
+}
+.container > div > div:last-child {
+  left: 300px;
+  width: calc(100% - 300px);
+}
+.navbar-default {
+  border-color: #f8f8f8;
+}
 #sidebar {
-  height: 100%;
-  padding-right: 0;
-  padding-top: 20px;
+  display: block;
+  position: fixed;
+  left: 0;
+  top: 50px;
+  padding: 0;
+  margin: 0;
+  overflow-y: scroll;
+  width: 300px;
+  height: calc(100% - 50px);
+  background-color: #f8f8f8;
 }
 #sidebar .nav {
   width: 95%;
 }
-#sidebar li {
-  border:0 #f2f2f2 solid;
-  border-bottom-width:1px;
+#sidebar .nav a {
+  text-decoration: none;
 }
-#sidebar .nav .active a  {
+#sidebar li {
+  border: 0 #f2f2f2 solid;
+  border-bottom-width: 1px;
+  padding-left: 15px;
+}
+#sidebar .nav .active a {
   font-weight: bold;
   text-decoration: none;
 }
+#sidebar .nav .active3 a {
+  text-decoration: none;
+}
 #bouton-bas-page {
-	  right: 110px;
-	  padding-bottom: 6px;
+  right: 110px;
+  padding-bottom: 6px;
 }
 #sidebar .nav .active > ul {
-	list-style: none;
-	text-align: center;
-	padding: 0;
+  list-style: none;
+  text-align: center;
+  padding: 0;
 }
 #sidebar .nav .active > ul > li > a {
-	font-size: 80%;
-	font-weight: normal;
-	padding: 5px;
-	width: 100%;
-	display: block;
-	text-decoration: underline;
+  font-size: 80%;
+  font-weight: normal;
+  padding: 5px;
+  width: 100%;
+  display: block;
+  text-decoration: none;
 }
 #sidebar .nav .active .active2 a {
   font-weight: bold;
-  text-decoration: none;	
+  text-decoration: none;
 }
-@media screen and (max-width: 767px) {
-  #bouton-bas-page {
-	  right: 65px;
-	/*  padding-bottom: 6px; */
-  }
+#sidebar .active li {
+  padding-left: 0;
 }
-  
+
 /* collapsed sidebar styles */
-@media screen and (max-width: 990px) { /* initial 767px */
-
-  .row-offcanvas {
-    position: relative;
-    -webkit-transition: all 0.25s ease-out;
-    -moz-transition: all 0.25s ease-out;
-    transition: all 0.25s ease-out;
-  }
-  .row-offcanvas-right
-  .sidebar-offcanvas {
-    right: -41.6%;
-  }
-
-  .row-offcanvas-left
-  .sidebar-offcanvas {
-    left: -41.6%;
-  }
-  .row-offcanvas-right.active {
-    right: 41.6%;
-  }
-  .row-offcanvas-left.active {
-    left: 41.6%;
-  }
-  .sidebar-offcanvas {
-    position: absolute;
-    top: 0;
-    width: 41.6%;
-  }
+@media screen and (max-width: 990px) {
+  /* initial 767px */
   #sidebar {
-    padding-top:0;
-  } 
+    display: none;
+  }
+  .container > div > div:last-child {
+    left: 0;
+    width: 100%;
+  }
+  .navbar-header {
+    position: absolute;
+    left: 130px;
+  }
+  #bouton-menu {
+    visibility: visible;
+  }
+
+  #sidebar.sidebar-show {
+    display: block;
+  }
+  .container > div > div:last-child.sidebar-show {
+    left: 300px;
+    width: calc(100% - 300px);
+  }
 }
 
-/* ajouté pour edge et ipad (bug menu sur 2 lignes) */
+@media screen and (max-width: 767px) {
+  /* initial 767px */
+  #bouton-bas-page {
+    right: 10px;
+  }
+  #bouton-menu {
+    width: 45px;
+  }
 
-    .navbar-header {
-        float: none;
+  @media screen and (max-width: 480px) {
+    #bouton-bas-page {
+      display: none;
     }
-    .navbar-toggle {
-        display: block;
+    #bouton-haut-page {
+      display: none;
     }
-    .navbar-collapse {
-        border-top: 1px solid transparent;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
-    }
-    .navbar-collapse.collapse {
-        display: none!important;
-    }
-    .navbar-nav {
-        float: none!important;
-        margin: 7.5px -15px;
-    }
-    .navbar-nav>li {
-        float: none;
-    }
-    .navbar-nav>li>a {
-        padding-top: 10px;
-        padding-bottom: 10px;
-    }
+  }
 
-/* ajouté pour ipad (bug sur 2 lignes) : http://stackoverflow.com/questions/22228239/bootstrap-navbar-static-top-menu-breaks-on-two-lines 
-@media (max-width: 1024px) {
-    .navbar-header {
-        float: none;
-    }
-    .navbar-toggle {
-        display: block;
-    }
-    .navbar-collapse {
-        border-top: 1px solid transparent;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
-    }
-    .navbar-collapse.collapse {
-        display: none!important;
-    }
-    .navbar-nav {
-        float: none!important;
-        margin: 7.5px -15px;
-    }
-    .navbar-nav>li {
-        float: none;
-    }
-    .navbar-nav>li>a {
-        padding-top: 10px;
-        padding-bottom: 10px;
-    }
 }
-
-*/
