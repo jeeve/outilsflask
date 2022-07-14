@@ -1,16 +1,16 @@
 $(document).ready(function () {
-  $("[data-toggle=offcanvas]").click(function () {
-    $(".row-offcanvas").toggleClass("active");
-    $("html,body").animate({ scrollTop: 0 }, "slow");
+
+  $("#bouton-menu").click(function () {
+      $("#sidebar").toggleClass("sidebar-show");
+      $(".container > div > div:last-child").toggleClass("sidebar-show");
   });
-  /*  
-  showHideBoutonMenu();
-  $(window).scroll(showHideBoutonMenu);
-  $(window).resize(showHideBoutonMenu);  
- */
+
   $("#bouton-bas-page").click(function () {
-    /*   $('.row-offcanvas').toggleClass('active'); */
     $("html, body").animate({ scrollTop: $("body").height() }, "slow");
+  });
+
+  $("#bouton-haut-page").click(function () {
+    $("html, body").animate({ scrollTop: 0 }, "slow");
   });
 
   showHideBoutonMenu();
@@ -19,13 +19,6 @@ $(document).ready(function () {
 });
 
 function showHideBoutonMenu(event) {
-  var st = $(this).scrollTop();
-  if (st <= 0 && $("body").width() > 980) {
-    $("#bouton-menu").addClass("hidden");
-  } else {
-    $("#bouton-menu").removeClass("hidden");
-  }
-
   if (
     $(window).scrollTop() >= $(document).height() - $(window).height() &&
     $("body").width() > 980
@@ -33,5 +26,14 @@ function showHideBoutonMenu(event) {
     $("#bouton-bas-page").addClass("hidden");
   } else {
     $("#bouton-bas-page").removeClass("hidden");
+  }
+
+  if (
+    $(window).scrollTop() < 50 &&
+    $("body").width() > 980
+  ) {
+    $("#bouton-haut-page").addClass("hidden");
+  } else {
+    $("#bouton-haut-page").removeClass("hidden");
   }
 }
