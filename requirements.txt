@@ -14,3 +14,4 @@ fitparse
 matplotlib
 bokeh
 sklearn
+protobuf==3.20.*
