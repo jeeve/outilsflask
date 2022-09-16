@@ -13,3 +13,4 @@ gpxpy
 fitparse
 matplotlib
 bokeh
+sklearn

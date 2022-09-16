@@ -39,6 +39,18 @@
   </div>
 </div>
 
+<br>
+<br />
+<br />
+<h2>Régression avec arbre de décision</h2>
+<br />
+<div class="row">
+  <div class="col-xs-12 col-sm-1 fond"></div>
+  <div class="col-xs-12 col-sm-10 fond">
+    <div id="regression-arbre-decision" class="fond"></div>
+  </div>
+</div>
+
 <br />
 <br />
 <br />
@@ -83,6 +95,17 @@
     );
   }
 
+  function calculeRegressionArbreDecision() {
+    $("#regression-arbre-decision").html(
+      '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/regressionlineaire?label=' +
+        $("#label").val() +
+        '">' +
+        '<img onload="imageChargee(this)" src="ia/arbredecision?label=' +
+        $("#label").val() +
+        '" class="img-responsive ombre-image "></a>'
+    );
+  }
+
   function calculeRegression2() {
     $("#regression2").html(
       '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/reseauneurones?label=' +
@@ -104,11 +127,13 @@
 
   $(document).ready(function () {
     calculeRegression1();
+    calculeRegressionArbreDecision();
     calculeRegression2();
   });
 
   $("#label").change(function () {
     calculeRegression1();
+    calculeRegressionArbreDecision();
     calculeRegression2();
   });
 

@@ -11,6 +11,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 import matplotlib.dates as mdates
 import numpy as np
+from sklearn import tree
 
 from bokeh.embed import components
 from bokeh.plotting import figure
@@ -20,7 +21,7 @@ matplotlib.rcParams['timezone'] = 'Europe/Paris'
 
 app = Flask(__name__)
 
-# Config options - Make sure you created a 'config.py' file.
+# Config options - Make sure you created a 'config.py' file.cd
 # app.config.from_object('config')
 # To get one variable, tape app.config['MY_VARIABLE']
 
@@ -38,6 +39,14 @@ def regression_lineaire():
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
+
+@app.route('/ia/arbredecision')
+def arbre_decision():
+    label = request.args.get('label', default='V 100m K72', type=str) 
+    fig = plot_arbre_decision(label)
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return Response(output.getvalue(), mimetype='image/png')    
     
 @app.route('/ia/reseauneurones')
 def reseau_neurones():
@@ -82,6 +91,39 @@ def plot_regression_lineaire(label):
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
 
     return fig 
+
+def plot_arbre_decision(label): 
+
+    fig = Figure()
+    fig.set_size_inches(10, 7, forward=True)
+
+    axis = fig.add_subplot(1, 1, 1)
+
+    df = pd.read_csv('https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv', usecols=['Date', 'Pratique', label])
+    df_windfoil = df[df['Pratique'].eq('Windfoil')]
+    df_windfoil["Date"] = pd.to_datetime(df_windfoil["Date"], format='%m/%d/%Y')
+    df_windfoil["Date"] = (df_windfoil["Date"] - pd.to_datetime('1/1/2019', format='%m/%d/%Y')).dt.days
+    df_windfoil = df_windfoil.dropna()
+
+    X = df_windfoil['Date']
+    y = df_windfoil[label]
+
+    axis.plot(X, y, '.b')
+
+    clf = tree.DecisionTreeRegressor()
+    X_b = np.c_[np.ones((X.shape[0], 1)), X]
+    clf = clf.fit(X_b, y)
+
+    X_new = np.array([[0], [2000]])
+    X_new_b = np.c_[np.ones((2, 1)), X_new]
+    y_predict = clf.predict(X_new_b)
+
+    axis.plot(X_new, y_predict, "r-")
+    axis.set_ylabel(label)
+    axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
+
+    return fig 
+
 
 def plot_reseau_neurones(label, nbcouches, nbneuronescouche): 
 
