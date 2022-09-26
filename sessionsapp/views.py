@@ -103,6 +103,9 @@ def plot_regression_lineaire(label):
 
 def plot_arbre_decision(label): 
 
+    from sklearn.ensemble import AdaBoostRegressor
+    from sklearn.tree import DecisionTreeRegressor  
+    
     fig = Figure()
     fig.set_size_inches(10, 7, forward=True)
 
@@ -120,7 +123,8 @@ def plot_arbre_decision(label):
 
     axis.plot(X, y, '.b')
 
-    clf = tree.DecisionTreeRegressor()
+    rng = np.random.RandomState(1)
+    clf = AdaBoostRegressor(DecisionTreeRegressor(max_depth=4), n_estimators=300, random_state=rng)
     x_new = np.linspace(0, 2000, 2001)
     X_new = np.expand_dims(x_new, axis=1)
 
