@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+  {% include 'header.html' %}
+
+  <body>
+    <div class="page-container">
+      <!-- top navbar -->
+      {% include 'navbar.html' %}
+      <div class="container">
+        <div class="row row-offcanvas row-offcanvas-left">
+          <!-- sidebar -->
+          {% include 'sidebar.html' %}
+          <!-- main area -->
+          <div class="col-xs-12 col-sm-12 col-md-9 fond">
+            {% block content %}{% endblock %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% include 'footer.html' %}
+  </body>
+</html>

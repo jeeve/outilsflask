@@ -1,0 +1,51 @@
+{% extends 'base.html' %} {% block content %}
+
+<h1>Météo</h1>
+
+<br />
+<br />
+
+<div class="row">
+  <div class="col-xs-12 col-sm-1 fond"></div>
+  <div class="col-xs-12 col-sm-10 fond">
+    <a target="_blank" href="/plot/{{ station }}/vent/{{ date }}">
+      <img
+        src="/plot/{{ station }}/vent/{{ date }}"
+        class="img-responsive ombre-image"
+      />
+    </a>
+  </div>
+</div>
+
+<br />
+<br />
+<div class="row">
+  <div class="col-xs-12 col-sm-1 fond"></div>
+  <div class="col-xs-12 col-sm-10 fond">
+    <a target="_blank" href="/rose/{{ station }}/{{ date }}">
+      <img
+        src="/rose/{{ station }}/{{ date }}"
+        class="img-responsive ombre-image"
+      />
+    </a>
+  </div>
+</div>
+
+<br />
+<br />
+<div class="row">
+  <div class="col-xs-12 col-sm-1 fond"></div>
+  <div class="col-xs-12 col-sm-10 fond">
+    <a target="_blank" href="/plot/{{ station }}/temperature/{{ date }}}">
+      <img
+        src="/plot/{{ station }}/temperature/{{ date }}"
+        class="img-responsive ombre-image"
+      />
+    </a>
+  </div>
+</div>
+
+<br />
+<br />
+
+{% endblock %}
