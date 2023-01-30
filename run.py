@@ -20,5 +20,5 @@ if __name__ == '__main__':
         port=5000,
         application=application,
         use_reloader=True,
-        use_debugger=True,
+        use_debugger=False,
         use_evalex=True)
