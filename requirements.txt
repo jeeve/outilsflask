@@ -1,4 +1,4 @@
-tensorflow-cpu==2.2.0
+tensorflow-cpu
 Flask==0.12.2
 Flask-Testing==0.6.2
 gunicorn==19.7.1
