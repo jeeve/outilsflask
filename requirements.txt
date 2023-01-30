@@ -13,5 +13,5 @@ gpxpy
 fitparse
 matplotlib
 bokeh
-sklearn
+scikit-learn
 protobuf==3.20.*
