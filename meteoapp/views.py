@@ -84,7 +84,7 @@ def niveau_png():
     return Response(output.getvalue(), mimetype='image/png')
 
 def create_niveau():
-    df = pd.read_csv("https://greduvent.000webhostapp.com/sensations/get-niveau.php")    
+    df = pd.read_csv("https://gpxweb.000webhostapp.com/sensations/get-niveau.php")    
     df.columns = ['date_heure', 'station', 'hauteur']
     df["date_heure"] = pd.to_datetime(df["date_heure"], format='%Y-%m-%d %H:%M')
 
@@ -119,9 +119,9 @@ def create_niveau():
 
 def create_plot_date(station, variable, date):
     if date == "":
-        df = pd.read_csv("https://greduvent.000webhostapp.com/sensations/get-meteo.php")    
+        df = pd.read_csv("https://gpxweb.000webhostapp.com/sensations/get-meteo.php")    
     else:                         
-        df = pd.read_csv("https://greduvent.000webhostapp.com/sensations/get-meteo.php?date=" + date)
+        df = pd.read_csv("https://gpxweb.000webhostapp.com/sensations/get-meteo.php?date=" + date)
     df.columns = ['date_heure', 'station', 'vent', 'orientation', 'temperature']
     #df["date_heure"] = pd.to_datetime(df["date_heure"], format='%Y-%m-%d %H:%M')
 
@@ -165,9 +165,9 @@ def create_plot_date(station, variable, date):
 
 def create_rose_date(station, date):
     if date == "":
-        df = pd.read_csv("https://greduvent.000webhostapp.com/sensations/get-meteo.php")    
+        df = pd.read_csv("https://gpxweb.000webhostapp.com/sensations/get-meteo.php")    
     else:                         
-        df = pd.read_csv("https://greduvent.000webhostapp.com/sensations/get-meteo.php?date=" + date)
+        df = pd.read_csv("https://gpxweb.000webhostapp.com/sensations/get-meteo.php?date=" + date)
     df.columns = ['date_heure', 'station', 'vent', 'orientation', 'temperature']
     df["date_heure"] = pd.to_datetime(df["date_heure"], format='%Y-%m-%d %H:%M')
     df[["vent", "orientation", "temperature"]] = df[["vent", "orientation", "temperature"]].apply(pd.to_numeric)
