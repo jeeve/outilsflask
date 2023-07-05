@@ -84,7 +84,9 @@ def niveau_png():
     return Response(output.getvalue(), mimetype='image/png')
 
 def create_niveau():
-    df = pd.read_csv("https://gpxweb.000webhostapp.com/sensations/get-niveau.php")    
+    d1 = datetime.date.today() + relativedelta(months=-24)
+    d2 = datetime.date.today() + relativedelta(days=1)
+    df = pd.read_csv("https://gpxweb.000webhostapp.com/sensations/get-niveau.php?date=" + str(d1.year) + str(d1.month).zfill(2) + str(d1.day).zfill(2) + str(d2.year) + str(d2.month).zfill(2) + str(d2.day).zfill(2))    
     df.columns = ['date_heure', 'station', 'hauteur']
     df["date_heure"] = pd.to_datetime(df["date_heure"], format='%Y-%m-%d %H:%M')
 
@@ -102,7 +104,7 @@ def create_niveau():
     
     axis.set_ylabel('hauteur (%)')
     
-    axis.set_xlim([datetime.date.today() + relativedelta(months=-12), datetime.date.today() + relativedelta(days=10)])
+    axis.set_xlim([datetime.date.today() + relativedelta(months=-24), datetime.date.today() + relativedelta(days=10)])
     axis.set_ylim(0, 100)
     axis.grid()
    
