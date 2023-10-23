@@ -1,4 +1,6 @@
-"""Classes to convert FIT files to GPX, including tools to process Strava Bulk Export
+"""
+https://github.com/dodo-saba/fit2gpx/
+Classes to convert FIT files to GPX, including tools to process Strava Bulk Export
 """
 import os
 import gzip
