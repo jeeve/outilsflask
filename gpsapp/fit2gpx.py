@@ -138,7 +138,7 @@ class Converter:
         return df_laps, df_points
 
     # Method adapted from: https://github.com/nidhaloff/gpx-converter/blob/master/gpx_converter/base.py
-    def dataframe_to_gpx(self, df_points, col_lat='latitude', col_long='longitude', col_time=None, col_alt=None, col_speed=None,
+    def dataframe_to_gpx(self, df_points, col_lat='latitude', col_long='longitude', col_time=None, col_alt=None,
                          gpx_name=None, gpx_desc=None, gpx_link=None, gpx_type=None):
         """
         Convert a pandas dataframe to gpx
@@ -186,8 +186,7 @@ class Converter:
                 latitude=df_points.loc[idx, col_lat],
                 longitude=df_points.loc[idx, col_long],
                 time=pd.Timestamp(df_points.loc[idx, col_time]) if col_time else None,
-                elevation=df_points.loc[idx, col_alt] if col_alt else None,
-                speed=df_points.loc[idx, col_speed] if col_speed else None 
+                elevation=df_points.loc[idx, col_alt] if col_alt else None
             )
 
             # Append GPX_TrackPoint to segment:
@@ -226,7 +225,6 @@ class Converter:
             col_long='longitude',
             col_time='timestamp',
             col_alt='altitude',
-            col_speed='speed'
         )
 
         # Step 3: Save file
@@ -386,7 +384,6 @@ class StravaConverter(Converter):
                 col_long='longitude',
                 col_time='timestamp',
                 col_alt='altitude',
-                col_speed='speed',
                 **strava_args
             )
 
