@@ -86,7 +86,7 @@ def niveau_png():
 def create_niveau():
     d1 = datetime.date.today() + relativedelta(months=-24)
     d2 = datetime.date.today() + relativedelta(days=1)
-    df = pd.read_csv("https://greduvent.herokuapp.com/sensations/get-niveau.php?date=" + str(d1.year) + str(d1.month).zfill(2) + str(d1.day).zfill(2) + str(d2.year) + str(d2.month).zfill(2) + str(d2.day).zfill(2))    
+    df = pd.read_csv("https://metapong.alwaysdata.net/sensations/get-niveau.php?date=" + str(d1.year) + str(d1.month).zfill(2) + str(d1.day).zfill(2) + str(d2.year) + str(d2.month).zfill(2) + str(d2.day).zfill(2))    
     df.columns = ['date_heure', 'station', 'hauteur']
     df["date_heure"] = pd.to_datetime(df["date_heure"], format='%Y-%m-%d %H:%M')
 
@@ -121,9 +121,9 @@ def create_niveau():
 
 def create_plot_date(station, variable, date):
     if date == "":
-        df = pd.read_csv("https://greduvent.herokuapp.com/sensations/get-meteo.php")    
+        df = pd.read_csv("https://metapong.alwaysdata.net/sensations/get-meteo.php")    
     else:                         
-        df = pd.read_csv("https://greduvent.herokuapp.com/sensations/get-meteo.php?date=" + date)
+        df = pd.read_csv("https://metapong.alwaysdata.net/sensations/get-meteo.php?date=" + date)
     df.columns = ['date_heure', 'station', 'vent', 'orientation', 'temperature']
     #df["date_heure"] = pd.to_datetime(df["date_heure"], format='%Y-%m-%d %H:%M')
 
@@ -167,9 +167,9 @@ def create_plot_date(station, variable, date):
 
 def create_rose_date(station, date):
     if date == "":
-        df = pd.read_csv("https://greduvent.herokuapp.com/sensations/get-meteo.php")    
+        df = pd.read_csv("https://metapong.alwaysdata.net/sensations/get-meteo.php")    
     else:                         
-        df = pd.read_csv("https://greduvent.herokuapp.com/sensations/get-meteo.php?date=" + date)
+        df = pd.read_csv("https://metapong.alwaysdata.net/sensations/get-meteo.php?date=" + date)
     df.columns = ['date_heure', 'station', 'vent', 'orientation', 'temperature']
     df["date_heure"] = pd.to_datetime(df["date_heure"], format='%Y-%m-%d %H:%M')
     df[["vent", "orientation", "temperature"]] = df[["vent", "orientation", "temperature"]].apply(pd.to_numeric)
