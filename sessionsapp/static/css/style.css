@@ -1,10 +1,10 @@
 
 @font-face {
  font-family: "Raleway";
-    src : url('../fonts/Raleway-Regular.eot');
-    src : url('../fonts/Raleway-Regular.woff') format('woff'),
-          url('../fonts/Raleway-Regular.svg') format('svg'),
-          url('../fonts/Raleway-Regular.ttf') format('truetype');		  
+    src : url('/fonts/Raleway-Regular.eot');
+    src : url('/fonts/Raleway-Regular.woff') format('woff'),
+          url('/fonts/Raleway-Regular.svg') format('svg'),
+          url('/fonts/Raleway-Regular.ttf') format('truetype');		  
 }
 /*
 body {
@@ -145,6 +145,9 @@ a.external {
  .sommaire li {
 	font-size: 100%; 
  }	
+ #sidebar {
+	width: 130px;
+ }
 }
 
 /* utilisé pour compenser le décalage des signets à cause de la navbar fixe */
@@ -154,9 +157,5 @@ a[name] {
   margin-top: -50px;
   display: inline-block; /* required for webkit browsers */
   vertical-align: top;
-}
-
-#calculer {
-	margin-left: 20px;
 }
 
