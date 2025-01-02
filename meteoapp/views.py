@@ -148,10 +148,9 @@ def create_plot_date(station, variable, date):
     if variable == "temperature":
         axis.set_ylabel("Température (°C)")         
     if ys.min() < 0:
-        axis.set_ylim(ys.min() - 10*ys.min()/100, ys.max() + 10*ys.max()/100)         
+        axis.set_ylim(ys.min() + 10*ys.min()/100, ys.max() + 10*ys.max()/100)         
     else:   
         axis.set_ylim(0, ys.max() + 10*ys.max()/100) 
-    axis.set_ylim(0, ys.max() + 10*ys.max()/100)    
     axis.grid()
     
     axis.xaxis.set_major_locator(mdates.HourLocator())
@@ -178,8 +177,10 @@ def create_rose_date(station, date):
     
     fig = Figure()
     fig.set_size_inches(7, 7, forward=True)
-    fig.suptitle(station)
-
+    station_str = station
+    if len(date) == 8:
+        station_str = station + " " + date[6:8] + '/' + date[4:6] + '/' + date[0:4]
+    fig.suptitle(station_str)
 
     ax = fig.add_subplot(1, 1, 1, projection="windrose")    
     wd = df_station['orientation']
