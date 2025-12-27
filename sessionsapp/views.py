@@ -94,7 +94,6 @@ def plot_regression_lineaire(label):
     X_new_b = np.c_[np.ones((2, 1)), X_new]
     y_predict = X_new_b @ theta_best
 
-
     axis.plot(X_new, y_predict, "r-")
     axis.set_ylabel(label)
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
@@ -166,7 +165,6 @@ def plot_plus_proche_voisins(label):
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
 
     return fig     
-
 
 def plot_reseau_neurones(label, nbcouches, nbneuronescouche): 
 
