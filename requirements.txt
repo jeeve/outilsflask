@@ -14,5 +14,5 @@ fitparse
 matplotlib
 bokeh
 scikit-learn
-protobuf==3.20.*
+protobuf
 fitdecode
