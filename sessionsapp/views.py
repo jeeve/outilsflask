@@ -11,8 +11,8 @@ import datetime
 from dateutil.relativedelta import relativedelta
 import matplotlib.dates as mdates
 import numpy as np
-from sklearn import tree
-from sklearn import neighbors
+#from sklearn import tree
+#from sklearn import neighbors
 
 from bokeh.embed import components
 from bokeh.plotting import figure
@@ -33,6 +33,7 @@ def upload_form():
     nb_points = df_windfoil.shape[0]
     return render_template('index.html', nb_points=nb_points)
 
+"""
 @app.route('/ia/regressionlineaire')
 def regression_lineaire():
     label = request.args.get('label', default='V 100m K72', type=str) 
@@ -66,7 +67,7 @@ def reseau_neurones():
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
-
+"""
 
 @app.route('/ia/statistique')
 def statistique():
@@ -87,6 +88,89 @@ def statistique_voile():
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
 
+
+def plot_statistique_par_aile(label):
+    """Trace l'évolution de la valeur `label` au fil du temps, une courbe par aile."""
+    fig = Figure()
+    fig.set_size_inches(10, 7, forward=True)
+    axis = fig.add_subplot(1, 1, 1)
+
+    # lire la colonne Aile en plus du label
+    df = pd.read_csv(
+        'https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv',
+        usecols=['Date', 'Pratique', 'Aile', label],
+    )
+    df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=[label, 'Aile'])
+    df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
+    df_windfoil['Date'] = (
+        df_windfoil['Date'] - pd.to_datetime('1/1/2019', format='%m/%d/%Y')
+    ).dt.days
+
+    # extraction de la partie "aile" (avant le premier espace)
+    df_windfoil['Wing'] = df_windfoil['Aile'].astype(str).str.split().str[0]
+
+    # tracer une ligne par aile
+    for wing, grp in df_windfoil.groupby('Wing'):
+        axis.plot(grp['Date'], grp[label], '-', label=wing)
+
+    axis.set_ylabel(label)
+    axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
+    axis.legend(title='Aile', loc='best')
+
+    return fig
+
+
+def plot_statistique_par_voile(label):
+    """Trace l'évolution du `label` au fil du temps, une courbe par voile (nom complet)."""
+    fig = Figure()
+    fig.set_size_inches(10, 7, forward=True)
+    axis = fig.add_subplot(1, 1, 1)
+
+    df = pd.read_csv(
+        'https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv',
+        usecols=['Date', 'Pratique', 'Voile', label],
+    )
+    df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=[label, 'Voile'])
+    df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
+    df_windfoil['Date'] = (
+        df_windfoil['Date'] - pd.to_datetime('1/1/2019', format='%m/%d/%Y')
+    ).dt.days
+
+    # tracer une ligne par voile (nom complet)
+    for voile, grp in df_windfoil.groupby('Voile'):
+        axis.plot(grp['Date'], grp[label], '-', label=voile)
+
+    axis.set_ylabel(label)
+    axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
+    axis.legend(title='Voile', loc='best')
+
+    return fig
+
+@app.route('/bokeh')
+def bokeh():
+
+    p = figure(min_width=600, height=600, x_axis_label="x", y_axis_label="y", active_scroll ="wheel_zoom")
+    x = [1, 2, 3, 4, 5]
+    y = [4, 5, 5, 7, 2]
+    p.circle(x, y)
+
+    # grab the static resources
+    js_resources = INLINE.render_js()
+    css_resources = INLINE.render_css()
+
+    # render template
+    script, div = components(p)
+    html = render_template(
+        'bokeh.html',
+        plot_script=script,
+        plot_div=div,
+        js_resources=js_resources,
+        css_resources=css_resources,
+    )
+
+    return html
+
+"""
 def plot_regression_lineaire(label): 
 
     fig = Figure()
@@ -241,85 +325,4 @@ def plot_reseau_neurones(label, nbcouches, nbneuronescouche):
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
 
     return fig
-
-
-def plot_statistique_par_aile(label):
-    """Trace l'évolution de la valeur `label` au fil du temps, une courbe par aile."""
-    fig = Figure()
-    fig.set_size_inches(10, 7, forward=True)
-    axis = fig.add_subplot(1, 1, 1)
-
-    # lire la colonne Aile en plus du label
-    df = pd.read_csv(
-        'https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv',
-        usecols=['Date', 'Pratique', 'Aile', label],
-    )
-    df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=[label, 'Aile'])
-    df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
-    df_windfoil['Date'] = (
-        df_windfoil['Date'] - pd.to_datetime('1/1/2019', format='%m/%d/%Y')
-    ).dt.days
-
-    # extraction de la partie "aile" (avant le premier espace)
-    df_windfoil['Wing'] = df_windfoil['Aile'].astype(str).str.split().str[0]
-
-    # tracer une ligne par aile
-    for wing, grp in df_windfoil.groupby('Wing'):
-        axis.plot(grp['Date'], grp[label], '-', label=wing)
-
-    axis.set_ylabel(label)
-    axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
-    axis.legend(title='Aile', loc='best')
-
-    return fig
-
-
-def plot_statistique_par_voile(label):
-    """Trace l'évolution du `label` au fil du temps, une courbe par voile (nom complet)."""
-    fig = Figure()
-    fig.set_size_inches(10, 7, forward=True)
-    axis = fig.add_subplot(1, 1, 1)
-
-    df = pd.read_csv(
-        'https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv',
-        usecols=['Date', 'Pratique', 'Voile', label],
-    )
-    df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=[label, 'Voile'])
-    df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
-    df_windfoil['Date'] = (
-        df_windfoil['Date'] - pd.to_datetime('1/1/2019', format='%m/%d/%Y')
-    ).dt.days
-
-    # tracer une ligne par voile (nom complet)
-    for voile, grp in df_windfoil.groupby('Voile'):
-        axis.plot(grp['Date'], grp[label], '-', label=voile)
-
-    axis.set_ylabel(label)
-    axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
-    axis.legend(title='Voile', loc='best')
-
-    return fig
-
-@app.route('/bokeh')
-def bokeh():
-
-    p = figure(min_width=600, height=600, x_axis_label="x", y_axis_label="y", active_scroll ="wheel_zoom")
-    x = [1, 2, 3, 4, 5]
-    y = [4, 5, 5, 7, 2]
-    p.circle(x, y)
-
-    # grab the static resources
-    js_resources = INLINE.render_js()
-    css_resources = INLINE.render_css()
-
-    # render template
-    script, div = components(p)
-    html = render_template(
-        'bokeh.html',
-        plot_script=script,
-        plot_div=div,
-        js_resources=js_resources,
-        css_resources=css_resources,
-    )
-
-    return html
+"""
