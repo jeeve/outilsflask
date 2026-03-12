@@ -67,6 +67,16 @@ def reseau_neurones():
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
 
+
+@app.route('/ia/statistique')
+def statistique():
+    """Retourne une image montrant l'évolution du label par aile."""
+    label = request.args.get('label', default='V 100m K72', type=str)
+    fig = plot_statistique_par_aile(label)
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return Response(output.getvalue(), mimetype='image/png')
+
 def plot_regression_lineaire(label): 
 
     fig = Figure()
@@ -219,6 +229,37 @@ def plot_reseau_neurones(label, nbcouches, nbneuronescouche):
     axis.plot(x, y, 'r-', label='Predictions')
     axis.set_ylabel(label)
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
+
+    return fig
+
+
+def plot_statistique_par_aile(label):
+    """Trace l'évolution de la valeur `label` au fil du temps, une courbe par aile."""
+    fig = Figure()
+    fig.set_size_inches(10, 7, forward=True)
+    axis = fig.add_subplot(1, 1, 1)
+
+    # lire la colonne Aile en plus du label
+    df = pd.read_csv(
+        'https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv',
+        usecols=['Date', 'Pratique', 'Aile', label],
+    )
+    df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=[label, 'Aile'])
+    df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
+    df_windfoil['Date'] = (
+        df_windfoil['Date'] - pd.to_datetime('1/1/2019', format='%m/%d/%Y')
+    ).dt.days
+
+    # extraction de la partie "aile" (avant le premier espace)
+    df_windfoil['Wing'] = df_windfoil['Aile'].astype(str).str.split().str[0]
+
+    # tracer une ligne par aile
+    for wing, grp in df_windfoil.groupby('Wing'):
+        axis.plot(grp['Date'], grp[label], '-', label=wing)
+
+    axis.set_ylabel(label)
+    axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
+    axis.legend(title='Aile', loc='best')
 
     return fig
 

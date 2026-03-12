@@ -30,6 +30,17 @@
 
 <br />
 <br />
+<h2>Statistique par aile</h2>
+<br />
+<div class="row">
+  <div class="col-xs-12 col-sm-1 fond"></div>
+  <div class="col-xs-12 col-sm-10 fond">
+    <div id="statistique" class="fond"></div>
+  </div>
+</div>
+
+<br />
+<br />
 <h2>Régression linéaire par équation normale</h2>
 <br />
 <div class="row">
@@ -86,8 +97,6 @@
     </table>
   </div>
 </div>
-
-<br />
 <br />
 
 <script>
@@ -153,6 +162,7 @@
     calculeRegressionArbreDecision();
     calculeRegressionPlusProcheVoisins();
     calculeRegression2();
+    calculeStatistique();
   });
 
   $("#label").change(function () {
@@ -160,11 +170,23 @@
     calculeRegressionArbreDecision();
     calculeRegressionPlusProcheVoisins();
     calculeRegression2();
+    calculeStatistique();
   });
 
   $("#calculer").click(function () {
     calculeRegression2();
   });
+
+  function calculeStatistique() {
+    $("#statistique").html(
+      '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/statistique?label=' +
+        $("#label").val() +
+        '">' +
+        '<img onload="imageChargee(this)" src="ia/statistique?label=' +
+        $("#label").val() +
+        '" class="img-responsive ombre-image "></a>'
+    );
+  }
 </script>
 
 {% endblock %}
