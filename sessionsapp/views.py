@@ -116,6 +116,7 @@ def plot_statistique_par_aile(label):
     axis.set_ylabel(label)
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
     axis.legend(title='Aile', loc='best')
+    axis.grid(True, linestyle='--', linewidth=0.5, alpha=0.7)
 
     return fig
 
@@ -143,6 +144,7 @@ def plot_statistique_par_voile(label):
     axis.set_ylabel(label)
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
     axis.legend(title='Voile', loc='best')
+    axis.grid(True, linestyle='--', linewidth=0.5, alpha=0.7)
 
     return fig
 
