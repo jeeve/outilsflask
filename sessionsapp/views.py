@@ -152,7 +152,7 @@ def bokeh():
     p = figure(min_width=600, height=600, x_axis_label="x", y_axis_label="y", active_scroll ="wheel_zoom")
     x = [1, 2, 3, 4, 5]
     y = [4, 5, 5, 7, 2]
-    p.circle(x, y)
+    p.scatter(x, y, size=10)
 
     # grab the static resources
     js_resources = INLINE.render_js()
