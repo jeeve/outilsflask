@@ -21,12 +21,34 @@
 <h2>Windfoil</h2>
 <p>{{ nb_points }} points</p>
 
+<br />
+<br />
+<div class="row">
+  <div class="col-xs-12 col-sm-1 fond"></div>
+  <div class="col-xs-12 col-sm-10 fond">
+    <div id="bar-year" class="fond"></div>
+  </div>
+</div>
+
+<br />
+<br />
 <select id="label">
   <option value="V 100m K72">V 100m</option>
   <option value="VMax K72 (noeuds)">V Max</option>
   <option value="Distance (km)">Distance</option>
 </select>
 <br />
+
+<br />
+<br />
+<h2>Moyenne par année</h2>
+<br />
+<div class="row">
+  <div class="col-xs-12 col-sm-1 fond"></div>
+  <div class="col-xs-12 col-sm-10 fond">
+    <div id="bar-year-label" class="fond"></div>
+  </div>
+</div>
 
 <br />
 <br />
@@ -49,6 +71,9 @@
     <div id="statistique-voile" class="fond"></div>
   </div>
 </div>
+
+<br />
+<br />
 
 <!--
 <br />
@@ -178,6 +203,8 @@
     calculeRegression2();
     calculeStatistique();
     calculeStatistiqueVoile();
+    calculeBarYear();
+    calculeBarYearLabel();
   });
 
   $("#label").change(function () {
@@ -187,6 +214,7 @@
     calculeRegression2();
     calculeStatistique();
     calculeStatistiqueVoile();
+    calculeBarYearLabel();
   });
 
   $("#calculer").click(function () {
@@ -210,6 +238,24 @@
         $("#label").val() +
         '">' +
         '<img onload="imageChargee(this)" src="ia/statistique/voile?label=' +
+        $("#label").val() +
+        '" class="img-responsive ombre-image "></a>'
+    );
+  }
+
+  function calculeBarYear() {
+    $("#bar-year").html(
+      '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/bar_year">' +
+        '<img onload="imageChargee(this)" src="ia/bar_year" class="img-responsive ombre-image "></a>'
+    );
+  }
+
+  function calculeBarYearLabel() {
+    $("#bar-year-label").html(
+      '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/bar_year_label?label=' +
+        $("#label").val() +
+        '">' +
+        '<img onload="imageChargee(this)" src="ia/bar_year_label?label=' +
         $("#label").val() +
         '" class="img-responsive ombre-image "></a>'
     );
