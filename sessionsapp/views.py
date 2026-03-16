@@ -22,13 +22,23 @@ matplotlib.rcParams['timezone'] = 'Europe/Paris'
 
 app = Flask(__name__)
 
+# Variable globale pour stocker le DataFrame
+_df = None
+
+def get_data():
+    """Charge le CSV une seule fois et retourne le DataFrame."""
+    global _df
+    if _df is None:
+        _df = pd.read_csv('https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv')
+    return _df
+
 # Config options - Make sure you created a 'config.py' file.cd
 # app.config.from_object('config')
 # To get one variable, tape app.config['MY_VARIABLE']
 
 @app.route('/ia')
 def upload_form():
-    df = pd.read_csv('https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv', usecols=['Date', 'Pratique', 'V 100m K72', 'VMax K72 (noeuds)', 'Distance (km)'])
+    df = get_data()
     df_windfoil = df[df['Pratique'].eq('Windfoil')]
     nb_points = df_windfoil.shape[0]
     return render_template('index.html', nb_points=nb_points)
@@ -96,10 +106,7 @@ def plot_statistique_par_aile(label):
     axis = fig.add_subplot(1, 1, 1)
 
     # lire la colonne Aile en plus du label
-    df = pd.read_csv(
-        'https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv',
-        usecols=['Date', 'Pratique', 'Aile', label],
-    )
+    df = get_data()
     df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=[label, 'Aile'])
     df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
     df_windfoil['Date'] = (
@@ -127,10 +134,7 @@ def plot_statistique_par_voile(label):
     fig.set_size_inches(10, 7, forward=True)
     axis = fig.add_subplot(1, 1, 1)
 
-    df = pd.read_csv(
-        'https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv',
-        usecols=['Date', 'Pratique', 'Voile', label],
-    )
+    df = get_data()
     df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=[label, 'Voile'])
     df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
     df_windfoil['Date'] = (
@@ -154,7 +158,7 @@ def plot_bar_year():
     fig.set_size_inches(10, 7, forward=True)
     axis = fig.add_subplot(1, 1, 1)
 
-    df = pd.read_csv('https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv', usecols=['Date', 'Pratique'])
+    df = get_data()
     df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=['Date'])
     df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
     df_windfoil['Year'] = df_windfoil['Date'].dt.year
@@ -174,7 +178,7 @@ def plot_bar_year_label(label):
     fig.set_size_inches(10, 7, forward=True)
     axis = fig.add_subplot(1, 1, 1)
 
-    df = pd.read_csv('https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv', usecols=['Date', 'Pratique', label])
+    df = get_data()
     df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=[label, 'Date'])
     df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
     df_windfoil['Year'] = df_windfoil['Date'].dt.year
@@ -238,7 +242,7 @@ def plot_regression_lineaire(label):
 
     axis = fig.add_subplot(1, 1, 1)
 
-    df = pd.read_csv('https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv', usecols=['Date', 'Pratique', label])
+    df = get_data()
     df_windfoil = df[df['Pratique'].eq('Windfoil')]
     df_windfoil["Date"] = pd.to_datetime(df_windfoil["Date"], format='%m/%d/%Y')
     df_windfoil["Date"] = (df_windfoil["Date"] - pd.to_datetime('1/1/2019', format='%m/%d/%Y')).dt.days
@@ -273,7 +277,7 @@ def plot_arbre_decision(label):
 
     axis = fig.add_subplot(1, 1, 1)
 
-    df = pd.read_csv('https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv', usecols=['Date', 'Pratique', label])
+    df = get_data()
     df_windfoil = df[df['Pratique'].eq('Windfoil')]
     df_windfoil["Date"] = pd.to_datetime(df_windfoil["Date"], format='%m/%d/%Y')
     df_windfoil["Date"] = (df_windfoil["Date"] - pd.to_datetime('1/1/2019', format='%m/%d/%Y')).dt.days
@@ -305,7 +309,7 @@ def plot_plus_proche_voisins(label):
 
     axis = fig.add_subplot(1, 1, 1)
 
-    df = pd.read_csv('https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv', usecols=['Date', 'Pratique', label])
+    df = get_data()
     df_windfoil = df[df['Pratique'].eq('Windfoil')]
     df_windfoil["Date"] = pd.to_datetime(df_windfoil["Date"], format='%m/%d/%Y')
     df_windfoil["Date"] = (df_windfoil["Date"] - pd.to_datetime('1/1/2019', format='%m/%d/%Y')).dt.days
@@ -337,7 +341,7 @@ def plot_reseau_neurones(label, nbcouches, nbneuronescouche):
 
     axis = fig.add_subplot(1, 1, 1)
 
-    df = pd.read_csv('https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv', usecols=['Date', 'Pratique', label])
+    df = get_data()
     df_windfoil = df[df['Pratique'].eq('Windfoil')]
     df_windfoil["Date"] = pd.to_datetime(df_windfoil["Date"], format='%m/%d/%Y')
     df_windfoil["Date"] = (df_windfoil["Date"] - pd.to_datetime('1/1/2019', format='%m/%d/%Y')).dt.days
