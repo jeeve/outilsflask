@@ -118,7 +118,7 @@ def plot_statistique_par_aile(label):
 
     # tracer une ligne par aile
     for wing, grp in df_windfoil.groupby('Wing'):
-        axis.plot(grp['Date'], grp[label], '-', label=wing)
+        axis.plot(grp['Date'], grp[label], 'o-', label=wing)
 
     axis.set_ylabel(label)
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
@@ -143,7 +143,7 @@ def plot_statistique_par_voile(label):
 
     # tracer une ligne par voile (nom complet)
     for voile, grp in df_windfoil.groupby('Voile'):
-        axis.plot(grp['Date'], grp[label], '-', label=voile)
+        axis.plot(grp['Date'], grp[label], 'o-', label=voile)
 
     axis.set_ylabel(label)
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
@@ -261,7 +261,7 @@ def plot_regression_lineaire(label):
     X_new_b = np.c_[np.ones((2, 1)), X_new]
     y_predict = X_new_b @ theta_best
 
-    axis.plot(X_new, y_predict, "r-")
+    axis.plot(X_new, y_predict, "ro-")
     axis.set_ylabel(label)
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
 
@@ -296,7 +296,7 @@ def plot_arbre_decision(label):
 
     y_predict = clf.fit(X, y).predict(X_new)
 
-    axis.plot(x_new, y_predict, "r-")
+    axis.plot(x_new, y_predict, "ro-")
     axis.set_ylabel(label)
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
 
@@ -327,7 +327,7 @@ def plot_plus_proche_voisins(label):
 
     y_predict = knn.fit(X, y).predict(X_new)
 
-    axis.plot(x_new, y_predict, "r-")
+    axis.plot(x_new, y_predict, "ro-")
     axis.set_ylabel(label)
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
 
@@ -383,7 +383,7 @@ def plot_reseau_neurones(label, nbcouches, nbneuronescouche):
 
 #    axis.set_xlim([xmin, xmax])
     axis.plot(train_features['Date'], train_labels, '.b')
-    axis.plot(x, y, 'r-', label='Predictions')
+    axis.plot(x, y, 'ro-', label='Predictions')
     axis.set_ylabel(label)
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
 
