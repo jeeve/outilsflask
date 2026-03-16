@@ -32,6 +32,28 @@
 
 <br />
 <br />
+<h2>Répartition des sessions par aile</h2>
+<br />
+<div class="row">
+  <div class="col-xs-12 col-sm-1 fond"></div>
+  <div class="col-xs-12 col-sm-10 fond">
+    <div id="pie-aile" class="fond"></div>
+  </div>
+</div>
+
+<br />
+<br />
+<h2>Répartition des sessions par voile</h2>
+<br />
+<div class="row">
+  <div class="col-xs-12 col-sm-1 fond"></div>
+  <div class="col-xs-12 col-sm-10 fond">
+    <div id="pie-voile" class="fond"></div>
+  </div>
+</div>
+
+<br />
+<br />
 <select id="label">
   <option value="V 100m K72">V 100m</option>
   <option value="VMax K72 (noeuds)">V Max</option>
@@ -205,6 +227,8 @@
     calculeStatistiqueVoile();
     calculeBarYear();
     calculeBarYearLabel();
+    calculePieAile();
+    calculePieVoile();
   });
 
   $("#label").change(function () {
@@ -247,6 +271,20 @@
     $("#bar-year").html(
       '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/bar_year">' +
         '<img onload="imageChargee(this)" src="ia/bar_year" class="img-responsive ombre-image "></a>'
+    );
+  }
+
+  function calculePieAile() {
+    $("#pie-aile").html(
+      '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/pie_aile">' +
+        '<img onload="imageChargee(this)" src="ia/pie_aile" class="img-responsive ombre-image "></a>'
+    );
+  }
+
+  function calculePieVoile() {
+    $("#pie-voile").html(
+      '<div class="loader-container"><img src="/sessions/static/images/image-vierge.jpg" class="img-responsive ombre-image"><img src="/sessions/static/images/loading.gif" class="loader"></div><a target="_blank" href="ia/pie_voile">' +
+        '<img onload="imageChargee(this)" src="ia/pie_voile" class="img-responsive ombre-image "></a>'
     );
   }
 

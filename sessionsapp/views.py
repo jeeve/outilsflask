@@ -192,6 +192,41 @@ def plot_bar_year_label(label):
 
     return fig
 
+def plot_pie_aile():
+    """Trace un camembert de la répartition des sessions par aile."""
+    fig = Figure()
+    fig.set_size_inches(10, 7, forward=True)
+    axis = fig.add_subplot(1, 1, 1)
+
+    df = get_data()
+    df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=['Aile'])
+    df_windfoil['Wing'] = df_windfoil['Aile'].astype(str).str.split().str[0]
+    sessions_per_wing = df_windfoil.groupby('Wing').size().reset_index(name='Count')
+
+    axis.pie(sessions_per_wing['Count'], autopct='%1.1f%%', startangle=90, textprops={'color':'white', 'fontsize': 14})
+    axis.set_title('Répartition des sessions par aile')
+    axis.legend(sessions_per_wing['Wing'], loc='best')
+    axis.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+    return fig
+
+def plot_pie_voile():
+    """Trace un camembert de la répartition des sessions par voile."""
+    fig = Figure()
+    fig.set_size_inches(10, 7, forward=True)
+    axis = fig.add_subplot(1, 1, 1)
+
+    df = get_data()
+    df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=['Voile'])
+    sessions_per_voile = df_windfoil.groupby('Voile').size().reset_index(name='Count')
+
+    axis.pie(sessions_per_voile['Count'], autopct='%1.1f%%', startangle=90, textprops={'color':'white', 'fontsize': 14})
+    axis.set_title('Répartition des sessions par voile')
+    axis.legend(sessions_per_voile['Voile'], loc='best')
+    axis.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+    return fig
+
 @app.route('/bokeh')
 def bokeh():
 
@@ -229,6 +264,22 @@ def bar_year_label():
     """Retourne une image montrant la moyenne du label par année."""
     label = request.args.get('label', default='V 100m K72', type=str)
     fig = plot_bar_year_label(label)
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return Response(output.getvalue(), mimetype='image/png')
+
+@app.route('/ia/pie_aile')
+def pie_aile():
+    """Retourne une image montrant la répartition des sessions par aile."""
+    fig = plot_pie_aile()
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return Response(output.getvalue(), mimetype='image/png')
+
+@app.route('/ia/pie_voile')
+def pie_voile():
+    """Retourne une image montrant la répartition des sessions par voile."""
+    fig = plot_pie_voile()
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
