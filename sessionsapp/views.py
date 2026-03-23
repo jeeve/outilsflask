@@ -261,30 +261,6 @@ def update_vmoy():
     return Response('{"updated": %d}' % updated, mimetype='application/json')
 
 
-@app.route('/bokeh')
-def bokeh():
-
-    p = figure(min_width=600, height=600, x_axis_label="x", y_axis_label="y", active_scroll ="wheel_zoom")
-    x = [1, 2, 3, 4, 5]
-    y = [4, 5, 5, 7, 2]
-    p.scatter(x, y, size=10)
-
-    # grab the static resources
-    js_resources = INLINE.render_js()
-    css_resources = INLINE.render_css()
-
-    # render template
-    script, div = components(p)
-    html = render_template(
-        'bokeh.html',
-        plot_script=script,
-        plot_div=div,
-        js_resources=js_resources,
-        css_resources=css_resources,
-    )
-
-    return html
-
 @app.route('/ia/bar_year')
 def bar_year():
     """Retourne une image montrant le nombre de sessions par année."""
@@ -473,4 +449,30 @@ def plot_reseau_neurones(label, nbcouches, nbneuronescouche):
     axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
 
     return fig
+"""
+
+"""
+@app.route('/bokeh')
+def bokeh():
+
+    p = figure(min_width=600, height=600, x_axis_label="x", y_axis_label="y", active_scroll ="wheel_zoom")
+    x = [1, 2, 3, 4, 5]
+    y = [4, 5, 5, 7, 2]
+    p.scatter(x, y, size=10)
+
+    # grab the static resources
+    js_resources = INLINE.render_js()
+    css_resources = INLINE.render_css()
+
+    # render template
+    script, div = components(p)
+    html = render_template(
+        'bokeh.html',
+        plot_script=script,
+        plot_div=div,
+        js_resources=js_resources,
+        css_resources=css_resources,
+    )
+
+    return html
 """
