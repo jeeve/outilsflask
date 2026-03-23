@@ -25,10 +25,10 @@ app = Flask(__name__)
 # Variable globale pour stocker le DataFrame
 _df = None
 
-def get_data():
+def get_data(force_reload=False):
     """Charge le CSV une seule fois et retourne le DataFrame."""
     global _df
-    if _df is None:
+    if _df is None or force_reload:
         _df = pd.read_csv('https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv')
     return _df
 
@@ -226,6 +226,40 @@ def plot_pie_voile():
     axis.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
 
     return fig
+
+@app.route('/ia/update_vmoy')
+def update_vmoy():
+    """Calcule les Vmoy manquantes depuis les GPX et met à jour le Google Sheet."""
+    from sessionsapp.update_vmoy import calcul_vmoy, SHEET_ID, get_gspread_client
+    import time
+
+    gc = get_gspread_client()
+    sh = gc.open_by_key(SHEET_ID)
+    ws = sh.sheet1
+
+    headers = ws.row_values(1)
+    gpx_col = headers.index('GPX') + 1
+    vmoy_col = headers.index('Vmoy') + 1
+
+    all_data = ws.get_all_values()
+    updated = 0
+
+    for i, row in enumerate(all_data[1:], start=2):
+        gpx_val = row[gpx_col - 1] if len(row) >= gpx_col else ''
+        vmoy_val = row[vmoy_col - 1] if len(row) >= vmoy_col else ''
+
+        if gpx_val.strip() and not vmoy_val.strip():
+            vmoy = calcul_vmoy(gpx_val.strip())
+            if vmoy is not None:
+                ws.update_cell(i, vmoy_col, vmoy)
+                updated += 1
+                time.sleep(1.5)
+
+    # Forcer le rechargement du DataFrame au prochain appel
+    get_data(force_reload=True)
+
+    return Response('{"updated": %d}' % updated, mimetype='application/json')
+
 
 @app.route('/bokeh')
 def bokeh():

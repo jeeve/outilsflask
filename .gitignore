@@ -8,3 +8,5 @@ app.db
 geckodriver.log
 .cache/
 fbapp/tests/*.db
+
+**/google/*.json
