@@ -10,3 +10,5 @@ geckodriver.log
 fbapp/tests/*.db
 
 **/google/*.json
+.vscode/
+.vscode/launch.json
