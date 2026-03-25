@@ -152,26 +152,6 @@ def plot_statistique_par_voile(label):
 
     return fig
 
-def plot_bar_year():
-    """Trace un graphique en barres du nombre de sessions par année."""
-    fig = Figure()
-    fig.set_size_inches(10, 7, forward=True)
-    axis = fig.add_subplot(1, 1, 1)
-
-    df = get_data()
-    df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=['Date'])
-    df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
-    df_windfoil['Year'] = df_windfoil['Date'].dt.year
-    sessions_per_year = df_windfoil.groupby('Year').size().reset_index(name='Count')
-
-    axis.bar(sessions_per_year['Year'], sessions_per_year['Count'], color='skyblue', width=0.8)
-    axis.set_xlabel('Année')
-    axis.set_ylabel('Nombre de sessions')
-    axis.set_title('Nombre de sessions par année')
-    axis.grid(True, linestyle='--', linewidth=0.5, alpha=0.7)
-
-    return fig
-
 def plot_bar_year_label(label):
     """Trace un graphique en barres de la moyenne du label par année."""
     fig = Figure()
@@ -290,14 +270,6 @@ def update_vmoy():
 
     return Response('{"updated": %d}' % updated, mimetype='application/json')
 
-
-@app.route('/ia/bar_year')
-def bar_year():
-    """Retourne une image montrant le nombre de sessions par année."""
-    fig = plot_bar_year()
-    output = io.BytesIO()
-    FigureCanvas(fig).print_png(output)
-    return Response(output.getvalue(), mimetype='image/png')
 
 @app.route('/ia/bar_year_label')
 def bar_year_label():

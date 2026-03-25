@@ -21,14 +21,6 @@
 <h2>Windfoil</h2>
 <p>{{ nb_points }} points</p>
 
-<br />
-<br />
-<div class="row">
-  <div class="col-xs-12 col-sm-1 fond"></div>
-  <div class="col-xs-12 col-sm-10 fond">
-    <div id="bar-year" class="fond"></div>
-  </div>
-</div>
 
 <br />
 <br />
@@ -239,7 +231,6 @@
     calculeRegression2();
     calculeStatistique();
     calculeStatistiqueVoile();
-    calculeBarYear();
     calculeBarYearWindDirection();
     calculeBarYearLabel();
     calculePieAile();
@@ -289,13 +280,6 @@
         '<img onload="imageChargee(this)" src="ia/statistique/voile?label=' +
         $("#label").val() +
         '" class="img-responsive ombre-image "></a>'
-    );
-  }
-
-  function calculeBarYear() {
-    $("#bar-year").html(
-      '<div class="loader-container"><img src="/sessions/static/images/loading.gif" class="loader img-responsive"></div><a target="_blank" href="ia/bar_year">' +
-        '<img onload="imageChargee(this)" src="ia/bar_year" class="img-responsive ombre-image "></a>'
     );
   }
 
