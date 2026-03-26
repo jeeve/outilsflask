@@ -227,6 +227,57 @@ def plot_bar_year_spot():
 
     return fig
 
+def plot_bar_year_aile():
+    """Trace un graphique en barres cumulées des ailes par année."""
+    fig = Figure()
+    fig.set_size_inches(10, 7, forward=True)
+    axis = fig.add_subplot(1, 1, 1)
+
+    df = get_data()
+    df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=['Date', 'Aile'])
+    df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
+    df_windfoil['Year'] = df_windfoil['Date'].dt.year
+    df_windfoil['Wing'] = df_windfoil['Aile'].astype(str).str.split().str[0]
+    
+    counts = df_windfoil.groupby(['Year', 'Wing']).size().unstack(fill_value=0)
+
+    counts.plot(kind='bar', stacked=True, ax=axis, colormap='tab20')
+    
+    axis.set_xlabel('Année')
+    axis.set_ylabel('Nombre de sessions')
+    axis.set_title('Ailes utilisées par année')
+    axis.legend(title='Aile', bbox_to_anchor=(1.05, 1), loc='upper left')
+    axis.grid(True, linestyle='--', linewidth=0.5, alpha=0.7)
+    
+    fig.tight_layout()
+
+    return fig
+
+def plot_bar_year_voile():
+    """Trace un graphique en barres cumulées des voiles par année."""
+    fig = Figure()
+    fig.set_size_inches(10, 7, forward=True)
+    axis = fig.add_subplot(1, 1, 1)
+
+    df = get_data()
+    df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=['Date', 'Voile'])
+    df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
+    df_windfoil['Year'] = df_windfoil['Date'].dt.year
+    
+    counts = df_windfoil.groupby(['Year', 'Voile']).size().unstack(fill_value=0)
+
+    counts.plot(kind='bar', stacked=True, ax=axis, colormap='tab20')
+    
+    axis.set_xlabel('Année')
+    axis.set_ylabel('Nombre de sessions')
+    axis.set_title('Voiles utilisées par année')
+    axis.legend(title='Voile', bbox_to_anchor=(1.05, 1), loc='upper left')
+    axis.grid(True, linestyle='--', linewidth=0.5, alpha=0.7)
+    
+    fig.tight_layout()
+
+    return fig
+
 def plot_pie_aile():
     """Trace un camembert de la répartition des sessions par aile."""
     fig = Figure()
@@ -317,6 +368,22 @@ def bar_year_wind_direction():
 def bar_year_spot():
     """Retourne une image montrant les spots par année."""
     fig = plot_bar_year_spot()
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return Response(output.getvalue(), mimetype='image/png')
+
+@app.route('/ia/bar_year_aile')
+def bar_year_aile():
+    """Retourne une image montrant les ailes par année."""
+    fig = plot_bar_year_aile()
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return Response(output.getvalue(), mimetype='image/png')
+
+@app.route('/ia/bar_year_voile')
+def bar_year_voile():
+    """Retourne une image montrant les voiles par année."""
+    fig = plot_bar_year_voile()
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')

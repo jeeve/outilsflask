@@ -40,6 +40,28 @@
 
 <br />
 <br />
+<h2>Ailes utilisées par année</h2>
+<br />
+<div class="row">
+  <div class="col-xs-12 col-sm-1 fond"></div>
+  <div class="col-xs-12 col-sm-10 fond">
+    <div id="bar-year-aile" class="fond"></div>
+  </div>
+</div>
+
+<br />
+<br />
+<h2>Voiles utilisées par année</h2>
+<br />
+<div class="row">
+  <div class="col-xs-12 col-sm-1 fond"></div>
+  <div class="col-xs-12 col-sm-10 fond">
+    <div id="bar-year-voile" class="fond"></div>
+  </div>
+</div>
+
+<br />
+<br />
 <h2>Répartition des sessions par aile</h2>
 <br />
 <div class="row">
@@ -238,6 +260,8 @@
     calculeStatistiqueVoile();
     calculeBarYearWindDirection();
     calculeBarYearSpot();
+    calculeBarYearAile();
+    calculeBarYearVoile();
     calculeBarYearLabel();
     calculePieAile();
     calculePieVoile();
@@ -300,6 +324,20 @@
     $("#bar-year-spot").html(
       '<div class="loader-container"><img src="/sessions/static/images/loading.gif" class="loader img-responsive"></div><a target="_blank" href="ia/bar_year_spot">' +
         '<img onload="imageChargee(this)" src="ia/bar_year_spot" class="img-responsive ombre-image "></a>'
+    );
+  }
+
+  function calculeBarYearAile() {
+    $("#bar-year-aile").html(
+      '<div class="loader-container"><img src="/sessions/static/images/loading.gif" class="loader img-responsive"></div><a target="_blank" href="ia/bar_year_aile">' +
+        '<img onload="imageChargee(this)" src="ia/bar_year_aile" class="img-responsive ombre-image "></a>'
+    );
+  }
+
+  function calculeBarYearVoile() {
+    $("#bar-year-voile").html(
+      '<div class="loader-container"><img src="/sessions/static/images/loading.gif" class="loader img-responsive"></div><a target="_blank" href="ia/bar_year_voile">' +
+        '<img onload="imageChargee(this)" src="ia/bar_year_voile" class="img-responsive ombre-image "></a>'
     );
   }
 
