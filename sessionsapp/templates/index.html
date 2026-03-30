@@ -74,6 +74,17 @@
 
 <br />
 <br />
+<h2>Répartition des sessions par spot</h2>
+<br />
+<div class="row">
+  <div class="col-xs-12 col-sm-1 fond"></div>
+  <div class="col-xs-12 col-sm-10 fond">
+    <div id="pie-spot" class="fond"></div>
+  </div>
+</div>
+
+<br />
+<br />
 <h2>Répartition des sessions par aile</h2>
 <br />
 <div class="row">
@@ -276,6 +287,7 @@
     calculeBarYearAile();
     calculeBarYearVoile();
     calculeBarYearLabel();
+    calculePieSpot();
     calculePieAile();
     calculePieVoile();
   });
@@ -358,6 +370,13 @@
     $("#bar-year-voile").html(
       '<div class="loader-container"><img src="/sessions/static/images/loading.gif" class="loader img-responsive"></div><a target="_blank" href="ia/bar_year_voile">' +
         '<img onload="imageChargee(this)" src="ia/bar_year_voile" class="img-responsive ombre-image "></a>'
+    );
+  }
+
+  function calculePieSpot() {
+    $("#pie-spot").html(
+      '<div class="loader-container"><img src="/sessions/static/images/loading.gif" class="loader img-responsive"></div><a target="_blank" href="ia/pie_spot">' +
+        '<img onload="imageChargee(this)" src="ia/pie_spot" class="img-responsive ombre-image "></a>'
     );
   }
 

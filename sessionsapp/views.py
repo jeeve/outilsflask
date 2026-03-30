@@ -304,6 +304,23 @@ def plot_bar_year_voile():
 
     return fig
 
+def plot_pie_spot():
+    """Trace un camembert de la répartition des sessions par spot."""
+    fig = Figure()
+    fig.set_size_inches(10, 7, forward=True)
+    axis = fig.add_subplot(1, 1, 1)
+
+    df = get_data()
+    df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=['Spot'])
+    sessions_per_spot = df_windfoil.groupby('Spot').size().reset_index(name='Count')
+
+    axis.pie(sessions_per_spot['Count'], autopct='%1.1f%%', startangle=90, textprops={'color':'white', 'fontsize': 14})
+    axis.set_title('Répartition des sessions par spot')
+    axis.legend(sessions_per_spot['Spot'], loc='best')
+    axis.axis('equal')
+
+    return fig
+
 def plot_pie_aile():
     """Trace un camembert de la répartition des sessions par aile."""
     fig = Figure()
@@ -418,6 +435,14 @@ def bar_year_aile():
 def bar_year_voile():
     """Retourne une image montrant les voiles par année."""
     fig = plot_bar_year_voile()
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return Response(output.getvalue(), mimetype='image/png')
+
+@app.route('/ia/pie_spot')
+def pie_spot():
+    """Retourne une image montrant la répartition des sessions par spot."""
+    fig = plot_pie_spot()
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
