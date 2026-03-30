@@ -227,6 +227,31 @@ def plot_bar_year_spot():
 
     return fig
 
+def plot_bar_km_spot():
+    """Trace un graphique en barres cumulées des km par spot et par année."""
+    fig = Figure()
+    fig.set_size_inches(10, 7, forward=True)
+    axis = fig.add_subplot(1, 1, 1)
+
+    df = get_data()
+    df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=['Date', 'Spot', 'Distance (km)'])
+    df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
+    df_windfoil['Year'] = df_windfoil['Date'].dt.year
+
+    km_per_spot = df_windfoil.groupby(['Year', 'Spot'])['Distance (km)'].sum().unstack(fill_value=0)
+
+    km_per_spot.plot(kind='bar', stacked=True, ax=axis, colormap='tab20')
+
+    axis.set_xlabel('Année')
+    axis.set_ylabel('Distance (km)')
+    axis.set_title('Nombre de km par spot')
+    axis.legend(title='Spot', bbox_to_anchor=(1.05, 1), loc='upper left')
+    axis.grid(True, linestyle='--', linewidth=0.5, alpha=0.7)
+
+    fig.tight_layout()
+
+    return fig
+
 def plot_bar_year_aile():
     """Trace un graphique en barres cumulées des ailes par année."""
     fig = Figure()
@@ -368,6 +393,14 @@ def bar_year_wind_direction():
 def bar_year_spot():
     """Retourne une image montrant les spots par année."""
     fig = plot_bar_year_spot()
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return Response(output.getvalue(), mimetype='image/png')
+
+@app.route('/ia/bar_km_spot')
+def bar_km_spot():
+    """Retourne une image montrant les km par spot et par année."""
+    fig = plot_bar_km_spot()
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
