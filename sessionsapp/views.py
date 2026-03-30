@@ -41,7 +41,8 @@ def upload_form():
     df = get_data()
     df_windfoil = df[df['Pratique'].eq('Windfoil')]
     nb_points = df_windfoil.shape[0]
-    return render_template('index.html', nb_points=nb_points)
+    total_km = df_windfoil['Distance (km)'].sum()
+    return render_template('index.html', nb_points=nb_points, total_km=total_km)
 
 """
 @app.route('/ia/regressionlineaire')
