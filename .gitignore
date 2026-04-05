@@ -9,6 +9,6 @@ geckodriver.log
 .cache/
 fbapp/tests/*.db
 
-**/google/*.json
+**/google/
 .vscode/
 .vscode/launch.json
