@@ -36,7 +36,7 @@ def calcul_vmoy(gpx_url):
         r.raise_for_status()
     except requests.RequestException as e:
         print(f"  Erreur téléchargement {gpx_url}: {e}")
-        return None
+        return "NAN"
 
     import re
     xml_clean = r.text
@@ -51,7 +51,7 @@ def calcul_vmoy(gpx_url):
         gpx = gpxpy.parse(xml_clean)
     except Exception as e:
         print(f"  Erreur parsing GPX: {e}")
-        return None
+        return "NAN"
 
     speeds_knots = []
     for track in gpx.tracks:

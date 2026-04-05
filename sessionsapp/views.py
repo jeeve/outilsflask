@@ -30,6 +30,13 @@ def get_data(force_reload=False):
     global _df
     if _df is None or force_reload:
         _df = pd.read_csv('https://docs.google.com/spreadsheets/d/1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4/export?format=csv')
+        if 'Vmoy' in _df.columns:
+            _df['Vmoy_raw'] = _df['Vmoy']
+        
+        numeric_cols = ['V 100m', 'V 100m K72', 'VMax K72 (noeuds)', 'Vmoy', 'Distance (km)']
+        for col in numeric_cols:
+            if col in _df.columns:
+                _df[col] = pd.to_numeric(_df[col], errors='coerce')
     return _df
 
 # Config options - Make sure you created a 'config.py' file.cd
@@ -359,6 +366,13 @@ def plot_pie_voile():
 @app.route('/ia/update_vmoy')
 def update_vmoy():
     """Calcule les Vmoy manquantes depuis les GPX et met à jour le Google Sheet."""
+    df = get_data()
+    if 'GPX' in df.columns and 'Vmoy_raw' in df.columns:
+        gpx_filled = df['GPX'].notna() & (df['GPX'].astype(str).str.strip() != '')
+        vmoy_missing = df['Vmoy_raw'].isna() | (df['Vmoy_raw'].astype(str).str.strip() == '')
+        if not (gpx_filled & vmoy_missing).any():
+            return Response('{"updated": 0}', mimetype='application/json')
+
     from sessionsapp.update_vmoy import calcul_vmoy, SHEET_ID, get_gspread_client
     import time
 
