@@ -59,6 +59,7 @@ def calcul_vitesses(gpx_url):
     total_distance = 0.0  # Distance totale en mètres
 
     VITESSE_MAX_REALISTE = 30 # Max réaliste pour le windfoil: 30 noeuds
+    ACCELERATION_MAX = 4.0  # Max réaliste en m/s² (accélération/décélération)
 
     for track in gpx.tracks:
         for segment in track.segments:
@@ -68,89 +69,119 @@ def calcul_vitesses(gpx_url):
 
             # 1. Filtrage strict des points aberrants (glitch GPS)
             # Un point est considéré aberrant si son déplacement depuis/vers ses voisins est > VITESSE_MAX_REALISTE
-            valid_points = []
+            # OU si l'accélération entre lui et ses voisins est > ACCELERATION_MAX
+            valid_segments = []
+            current_segment = []
+
+            # Pré-calculer les vitesses instantanées entre tous les points consécutifs
+            speeds = []  # speeds[i] = vitesse en m/s de points[i] vers points[i+1]
+            for i in range(len(points) - 1):
+                p1, p2 = points[i], points[i+1]
+                if p1.time and p2.time:
+                    dt = (p2.time - p1.time).total_seconds()
+                    if dt > 0 and dt < 60:  # Valider que le temps est cohérent
+                        dist = p1.distance_2d(p2)
+                        speed_ms = dist / dt  # vitesse en m/s
+                        speeds.append(speed_ms)
+                    else:
+                        speeds.append(None)
+                else:
+                    speeds.append(None)
+
             for i in range(len(points)):
                 p = points[i]
                 if not p.time:
+                    if len(current_segment) >= 2:
+                        valid_segments.append(current_segment)
+                    current_segment = []
                     continue
-                
-                # Vérifier la vitesse par rapport au point précédent
-                speed_prev = 0
-                if i > 0 and points[i-1].time:
-                    dt = (p.time - points[i-1].time).total_seconds()
-                    if dt > 0:
-                        speed_prev = (points[i-1].distance_2d(p) / dt) * 1.94384
-                
-                # Vérifier la vitesse par rapport au point suivant
-                speed_next = 0
-                if i < len(points) - 1 and points[i+1].time:
-                    dt = (points[i+1].time - p.time).total_seconds()
-                    if dt > 0:
-                        speed_next = (p.distance_2d(points[i+1]) / dt) * 1.94384
 
-                # Si l'une des vitesses instantanées est totalement aberrante (> 40nds), le point est un "saut"
-                # Sauf si c'est le tout premier/dernier point avec un grand laps de temps
-                if (speed_prev > VITESSE_MAX_REALISTE and speed_next > VITESSE_MAX_REALISTE):
-                    continue # On élimine le point
-                    
-                # Si speed_prev est aberrante mais speed_next est normale, le point est quand même suspect
-                # On va appliquer une règle stricte : un point connecté par une vitesse aberrante à son voisin immédiat de temps court est un glitch.
                 is_glitch = False
-                for p_adj in [points[i-1] if i>0 else None, points[i+1] if i<len(points)-1 else None]:
-                    if p_adj and p_adj.time:
-                        dt = abs((p.time - p_adj.time).total_seconds())
-                        if dt > 0 and dt < 10: # On check seulement sur des temps courts (10 sec max)
-                            if (p.distance_2d(p_adj) / dt) * 1.94384 > VITESSE_MAX_REALISTE:
-                                is_glitch = True
-                
-                if not is_glitch:
-                    valid_points.append(p)
 
-            if len(valid_points) < 2:
+                # Vérifier les accélérations par rapport aux points adjacents
+                if i > 0 and speeds[i-1] is not None and i < len(speeds) and speeds[i] is not None:
+                    v1_ms = speeds[i-1]
+                    if i + 1 < len(points) and points[i+1].time:
+                        v2_ms = speeds[i]
+                        dt_accel = (points[i+1].time - points[i-1].time).total_seconds()
+                        if dt_accel > 0 and dt_accel < 30:
+                            accel = abs(v2_ms - v1_ms) / dt_accel
+                            if accel > ACCELERATION_MAX:
+                                is_glitch = True
+
+                speed_prev = speeds[i-1] * 1.94384 if i > 0 and speeds[i-1] is not None else 0
+                speed_next = speeds[i] * 1.94384 if i < len(speeds) and speeds[i] is not None else 0
+
+                if speed_prev > VITESSE_MAX_REALISTE or speed_next > VITESSE_MAX_REALISTE:
+                    is_glitch = True
+
+                for adj_idx in [i-1, i+1]:
+                    if 0 <= adj_idx < len(points):
+                        p_adj = points[adj_idx]
+                        if p_adj.time:
+                            dt = abs((p.time - p_adj.time).total_seconds())
+                            if dt > 0 and dt < 10:
+                                if (p.distance_2d(p_adj) / dt) * 1.94384 > VITESSE_MAX_REALISTE:
+                                    is_glitch = True
+
+                if not is_glitch:
+                    current_segment.append(p)
+                elif len(current_segment) >= 2:
+                    valid_segments.append(current_segment)
+                    current_segment = []
+
+            if len(current_segment) >= 2:
+                valid_segments.append(current_segment)
+
+            if not valid_segments:
                 continue
 
-            # Calcul de la distance totale du segment
-            for i in range(1, len(valid_points)):
-                p1, p2 = valid_points[i - 1], valid_points[i]
-                total_distance += p1.distance_2d(p2)
+            # Calcul des distances et vitesses uniquement sur les segments valides
+            for segment_points in valid_segments:
+                if len(segment_points) < 2:
+                    continue
 
-            # 2. Calcul Vmoy (instantané)
-            for i in range(1, len(valid_points)):
-                p1, p2 = valid_points[i - 1], valid_points[i]
-                dt = (p2.time - p1.time).total_seconds()
-                if dt > 0 and dt < 5: # Seulement des segments continus
-                    dist = p1.distance_2d(p2)
-                    speed_knots = (dist / dt) * 1.94384
-                    if speed_knots <= VITESSE_MAX_REALISTE:
-                        speeds_knots.append(speed_knots)
-            
-            # 3. Calcul Vmax (Vitesse glissante sur ~2 secondes)
-            for i in range(len(valid_points) - 1):
-                p1 = valid_points[i]
-                for j in range(i + 1, len(valid_points)):
-                    p2 = valid_points[j]
+                for i in range(1, len(segment_points)):
+                    p1, p2 = segment_points[i - 1], segment_points[i]
+                    total_distance += p1.distance_2d(p2)
+
+                # 2. Calcul Vmoy (instantané)
+                for i in range(1, len(segment_points)):
+                    p1, p2 = segment_points[i - 1], segment_points[i]
                     dt = (p2.time - p1.time).total_seconds()
-                    if dt >= 2.0:
-                        if dt < 6.0: # Fenêtre valide (2s à 6s)
+                    if dt > 0 and dt < 5:
+                        dist = p1.distance_2d(p2)
+                        speed_knots = (dist / dt) * 1.94384
+                        if speed_knots <= VITESSE_MAX_REALISTE:
+                            speeds_knots.append(speed_knots)
+
+                # 3. Calcul Vmax (Vitesse glissante sur ~2 secondes)
+                for i in range(len(segment_points) - 1):
+                    p1 = segment_points[i]
+                    for j in range(i + 1, len(segment_points)):
+                        p2 = segment_points[j]
+                        dt = (p2.time - p1.time).total_seconds()
+                        if dt > 6.0:
+                            break
+                        if dt >= 2.0:
                             dist = p1.distance_2d(p2)
                             speed_knots = (dist / dt) * 1.94384
                             if speed_knots <= VITESSE_MAX_REALISTE and speed_knots > vmax:
                                 vmax = speed_knots
-                        break 
-            
-            # 4. Calcul V100 (meilleure vitesse sur ligne droite >= 100m)
-            for i in range(len(valid_points) - 1):
-                p1 = valid_points[i]
-                for j in range(i + 1, len(valid_points)):
-                    p2 = valid_points[j]
-                    dist = p1.distance_2d(p2)
-                    if dist >= 100.0:
+
+                # 4. Calcul V100 (meilleure vitesse sur ligne droite >= 100m)
+                for i in range(len(segment_points) - 1):
+                    p1 = segment_points[i]
+                    for j in range(i + 1, len(segment_points)):
+                        p2 = segment_points[j]
                         dt = (p2.time - p1.time).total_seconds()
-                        if dt > 0 and dt >= 5.0:  # Ajouter minimum 5 secondes pour 100m
+                        if dt > 30.0:
+                            break
+                        dist = p1.distance_2d(p2)
+                        if dist >= 100.0 and dt >= 5.0:
                             speed_knots = (dist / dt) * 1.94384
                             if speed_knots <= VITESSE_MAX_REALISTE and speed_knots > max_v100:
                                 max_v100 = speed_knots
-                        break # Fin de la ligne droite de 100m
 
     above = [s for s in speeds_knots if s > SEUIL_NOEUDS]
     vmoy = round(sum(above) / len(above), 2) if above else 0.0
