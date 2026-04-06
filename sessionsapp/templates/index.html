@@ -109,8 +109,8 @@
 <br />
 <div class="text-center">
   <select id="label" class="form-control" style="width: auto; display: inline-block; font-size: 16px;">
-    <option value="V 100m K72">V 100m</option>
-    <option value="VMax K72 (noeuds)">V Max</option>
+    <option value="V100">V 100m</option>
+    <option value="Vmax">V Max</option>
     <option value="Vmoy">V moy</option>
     <option value="Distance (km)">Distance</option>
   </select>
@@ -299,9 +299,9 @@
   }
 
   $("#label").change(function () {
-    if ($("#label").val() === "Vmoy") {
-      // Afficher un message de chargement et lancer le calcul des Vmoy manquantes
-      $("#bar-year-label").html('<div class="loader-container"><img src="/sessions/static/images/loading.gif" class="loader img-responsive"></div><p class="text-center">Calcul des Vmoy en cours...</p>');
+    if (["Vmoy", "Vmax", "V100"].includes($("#label").val())) {
+      // Afficher un message de chargement et lancer le calcul des vitesses manquantes
+      $("#bar-year-label").html('<div class="loader-container"><img src="/sessions/static/images/loading.gif" class="loader img-responsive"></div><p class="text-center">Calcul des vitesses en cours...</p>');
       $("#statistique").html('<div class="loader-container"><img src="/sessions/static/images/loading.gif" class="loader img-responsive"></div>');
       $("#statistique-voile").html('<div class="loader-container"><img src="/sessions/static/images/loading.gif" class="loader img-responsive"></div>');
       $.getJSON("ia/update_vmoy", function () {

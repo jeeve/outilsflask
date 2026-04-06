@@ -11,6 +11,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 import matplotlib.dates as mdates
 import numpy as np
+import threading
 #from sklearn import tree
 #from sklearn import neighbors
 
@@ -25,6 +26,68 @@ app = Flask(__name__)
 # Variable globale pour stocker le DataFrame
 _df = None
 
+def calculate_missing_speeds_async():
+    """Calcule les vitesses manquantes en arrière-plan (thread)."""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    try:
+        from sessionsapp.updade_calcul import calcul_vitesses, SHEET_ID, get_gspread_client
+        
+        logger.info("Démarrage du calcul en arrière-plan...")
+        gc = get_gspread_client()
+        sh = gc.open_by_key(SHEET_ID)
+        ws = sh.sheet1
+
+        headers = ws.row_values(1)
+        gpx_col = headers.index('GPX') + 1 if 'GPX' in headers else None
+        vmoy_col = headers.index('Vmoy') + 1 if 'Vmoy' in headers else None
+        vmax_col = headers.index('Vmax') + 1 if 'Vmax' in headers else None
+        v100_col = headers.index('V100') + 1 if 'V100' in headers else None
+        distance_col = headers.index('Distance (km)') + 1 if 'Distance (km)' in headers else None
+        distance_simple_col = headers.index('Distance') + 1 if 'Distance' in headers else None
+
+        if not (gpx_col and vmoy_col and vmax_col and v100_col and distance_col):
+            return
+
+        all_data = ws.get_all_values()
+        updated = 0
+        
+        for i, row in enumerate(all_data[1:], start=2):
+            try:
+                gpx_val = row[gpx_col - 1].strip() if len(row) >= gpx_col and row[gpx_col - 1] else ''
+                vmoy_val = row[vmoy_col - 1].strip() if len(row) >= vmoy_col and row[vmoy_col - 1] else ''
+                vmax_val = row[vmax_col - 1].strip() if len(row) >= vmax_col and row[vmax_col - 1] else ''
+                v100_val = row[v100_col - 1].strip() if len(row) >= v100_col and row[v100_col - 1] else ''
+                distance_val = row[distance_col - 1].strip() if len(row) >= distance_col and row[distance_col - 1] else ''
+                distance_simple_val = row[distance_simple_col - 1].strip() if distance_simple_col and len(row) >= distance_simple_col and row[distance_simple_col - 1] else ''
+
+                if gpx_val and (not vmoy_val or not vmax_val or not v100_val or not distance_val or (distance_simple_col and not distance_simple_val)):
+                    res = calcul_vitesses(gpx_val)
+                    if res is not None:
+                        vmoy, vmax, v100, distance_km = res
+                        if not vmoy_val:
+                            ws.update_cell(i, vmoy_col, str(vmoy))
+                        if not vmax_val:
+                            ws.update_cell(i, vmax_col, str(vmax))
+                        if not v100_val:
+                            ws.update_cell(i, v100_col, str(v100))
+                        if not distance_val:
+                            ws.update_cell(i, distance_col, str(distance_km))
+                        if distance_simple_col and not distance_simple_val:
+                            ws.update_cell(i, distance_simple_col, str(distance_km))
+                        updated += 1
+                        logger.info(f"Ligne {i} mise à jour en arrière-plan")
+            except Exception as e:
+                logger.warning(f"Erreur ligne {i} (background): {e}")
+                continue
+        
+        if updated > 0:
+            logger.info(f"Calcul en arrière-plan terminé: {updated} vitesses écrites")
+            get_data(force_reload=True)
+    except Exception as e:
+        logger.warning(f"Erreur calcul background: {e}")
+
 def get_data(force_reload=False):
     """Charge le CSV une seule fois et retourne le DataFrame."""
     global _df
@@ -33,7 +96,8 @@ def get_data(force_reload=False):
         if 'Vmoy' in _df.columns:
             _df['Vmoy_raw'] = _df['Vmoy']
         
-        numeric_cols = ['V 100m', 'V 100m K72', 'VMax K72 (noeuds)', 'Vmoy', 'Distance (km)']
+        # S"assurer que V100 et Vmax sont reconnues
+        numeric_cols = ['V 100m', 'V 100m K72', 'VMax K72 (noeuds)', 'Vmoy', 'Distance (km)', 'Vmax', 'V100']
         for col in numeric_cols:
             if col in _df.columns:
                 _df[col] = pd.to_numeric(_df[col], errors='coerce')
@@ -45,6 +109,12 @@ def get_data(force_reload=False):
 
 @app.route('/ia')
 def upload_form():
+    """Affiche la page et lance le calcul des vitesses en arrière-plan."""
+    # Lancer le calcul en background sans bloquer la page
+    thread = threading.Thread(target=calculate_missing_speeds_async, daemon=True)
+    thread.start()
+    
+    # Afficher la page immédiatement
     df = get_data()
     df_windfoil = df[df['Pratique'].eq('Windfoil')]
     nb_points = df_windfoil.shape[0]
@@ -90,7 +160,7 @@ def reseau_neurones():
 @app.route('/ia/statistique')
 def statistique():
     """Retourne une image montrant l'évolution du label par aile."""
-    label = request.args.get('label', default='V 100m K72', type=str)
+    label = request.args.get('label', default='V100', type=str)
     fig = plot_statistique_par_aile(label)
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
@@ -100,7 +170,7 @@ def statistique():
 @app.route('/ia/statistique/voile')
 def statistique_voile():
     """Retourne une image montrant l'évolution du label par voile."""
-    label = request.args.get('label', default='V 100m K72', type=str)
+    label = request.args.get('label', default='V100', type=str)
     fig = plot_statistique_par_voile(label)
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
@@ -365,49 +435,101 @@ def plot_pie_voile():
 
 @app.route('/ia/update_vmoy')
 def update_vmoy():
-    """Calcule les Vmoy manquantes depuis les GPX et met à jour le Google Sheet."""
-    df = get_data()
-    if 'GPX' in df.columns and 'Vmoy_raw' in df.columns:
-        gpx_filled = df['GPX'].notna() & (df['GPX'].astype(str).str.strip() != '')
-        vmoy_missing = df['Vmoy_raw'].isna() | (df['Vmoy_raw'].astype(str).str.strip() == '')
-        if not (gpx_filled & vmoy_missing).any():
-            return Response('{"updated": 0}', mimetype='application/json')
+    """Calcule les Vmoy, Vmax et V100 manquantes depuis les GPX et met à jour le Google Sheet."""
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
+    logger = logging.getLogger(__name__)
+    
+    try:
+        from sessionsapp.updade_calcul import calcul_vitesses, SHEET_ID, get_gspread_client
 
-    from sessionsapp.update_vmoy import calcul_vmoy, SHEET_ID, get_gspread_client
-    import time
+        logger.info("Connexion au Google Sheet...")
+        gc = get_gspread_client()
+        sh = gc.open_by_key(SHEET_ID)
+        ws = sh.sheet1
 
-    gc = get_gspread_client()
-    sh = gc.open_by_key(SHEET_ID)
-    ws = sh.sheet1
+        headers = ws.row_values(1)
+        logger.info(f"Headers trouvés: {headers}")
+        
+        # Trouver les indices des colonnes
+        gpx_col = headers.index('GPX') + 1 if 'GPX' in headers else None
+        vmoy_col = headers.index('Vmoy') + 1 if 'Vmoy' in headers else None
+        vmax_col = headers.index('Vmax') + 1 if 'Vmax' in headers else None
+        v100_col = headers.index('V100') + 1 if 'V100' in headers else None
+        distance_col = headers.index('Distance (km)') + 1 if 'Distance (km)' in headers else None
+        distance_simple_col = headers.index('Distance') + 1 if 'Distance' in headers else None
 
-    headers = ws.row_values(1)
-    gpx_col = headers.index('GPX') + 1
-    vmoy_col = headers.index('Vmoy') + 1
+        logger.info(f"Colonnes trouvées: GPX={gpx_col}, Vmoy={vmoy_col}, Vmax={vmax_col}, V100={v100_col}, Distance_km={distance_col}, Distance={distance_simple_col}")
+        
+        if not gpx_col or not vmoy_col or not vmax_col or not v100_col or not distance_col:
+            return Response('{"error": "Colonnes manquantes", "headers": %s}' % headers, mimetype='application/json')
 
-    all_data = ws.get_all_values()
-    updated = 0
+        all_data = ws.get_all_values()
+        logger.info(f"Nombre de lignes: {len(all_data)}")
+        updated = 0
 
-    for i, row in enumerate(all_data[1:], start=2):
-        gpx_val = row[gpx_col - 1] if len(row) >= gpx_col else ''
-        vmoy_val = row[vmoy_col - 1] if len(row) >= vmoy_col else ''
+        from gspread.cell import Cell
 
-        if gpx_val.strip() and not vmoy_val.strip():
-            vmoy = calcul_vmoy(gpx_val.strip())
-            if vmoy is not None:
-                ws.update_cell(i, vmoy_col, vmoy)
-                updated += 1
-                time.sleep(1.5)
+        for i, row in enumerate(all_data[1:], start=2):
+            try:
+                # Accès sécurisé aux valeurs de la ligne
+                gpx_val = row[gpx_col - 1].strip() if len(row) >= gpx_col and row[gpx_col - 1] else ''
+                vmoy_val = row[vmoy_col - 1].strip() if len(row) >= vmoy_col and row[vmoy_col - 1] else ''
+                vmax_val = row[vmax_col - 1].strip() if len(row) >= vmax_col and row[vmax_col - 1] else ''
+                v100_val = row[v100_col - 1].strip() if len(row) >= v100_col and row[v100_col - 1] else ''
+                distance_val = row[distance_col - 1].strip() if len(row) >= distance_col and row[distance_col - 1] else ''
+                distance_simple_val = row[distance_simple_col - 1].strip() if distance_simple_col and len(row) >= distance_simple_col and row[distance_simple_col - 1] else ''
 
-    # Forcer le rechargement du DataFrame au prochain appel
-    get_data(force_reload=True)
+                # Traiter les lignes qui ont un GPX mais manquent d'au moins une vitesse ou distance
+                if gpx_val and (not vmoy_val or not vmax_val or not v100_val or not distance_val or (distance_simple_col and not distance_simple_val)):
+                    logger.info(f"Ligne {i}: GPX={gpx_val[:50]}... Vmoy={vmoy_val}, Vmax={vmax_val}, V100={v100_val}, Distance_km={distance_val}, Distance={distance_simple_val}")
+                    res = calcul_vitesses(gpx_val)
+                    if res is not None:
+                        vmoy, vmax, v100, distance_km = res
+                        logger.info(f"Ligne {i}: Calculé -> Vmoy={vmoy}, Vmax={vmax}, V100={v100}, Distance={distance_km} km")
+                        
+                        # Écrire les valeurs immédiatement dans le sheet
+                        try:
+                            if not vmoy_val:
+                                ws.update_cell(i, vmoy_col, str(vmoy))
+                                logger.info(f"Ligne {i}: Vmoy écrite")
+                            if not vmax_val:
+                                ws.update_cell(i, vmax_col, str(vmax))
+                                logger.info(f"Ligne {i}: Vmax écrite")
+                            if not v100_val:
+                                ws.update_cell(i, v100_col, str(v100))
+                                logger.info(f"Ligne {i}: V100 écrite")
+                            if not distance_val:
+                                ws.update_cell(i, distance_col, str(distance_km))
+                                logger.info(f"Ligne {i}: Distance (km) écrite")
+                            if distance_simple_col and not distance_simple_val:
+                                ws.update_cell(i, distance_simple_col, str(distance_km))
+                                logger.info(f"Ligne {i}: Distance écrite")
+                            updated += 1
+                        except Exception as e:
+                            logger.exception(f"Erreur lors de l'écriture ligne {i}: {e}")
+                    else:
+                        logger.warning(f"Ligne {i}: calcul_vitesses retourné None")
+            except Exception as e:
+                logger.exception(f"Erreur lors du traitement de la ligne {i}: {e}")
+                continue
+                    
+        logger.info(f"Total écrit: {updated} lignes")
 
-    return Response('{"updated": %d}' % updated, mimetype='application/json')
+        # Forcer le rechargement du DataFrame au prochain appel
+        get_data(force_reload=True)
+
+        return Response('{"updated": %d}' % updated, mimetype='application/json')
+    
+    except Exception as e:
+        logger.exception(f"Erreur générale: {e}")
+        return Response('{"error": "%s"}' % str(e), mimetype='application/json')
 
 
 @app.route('/ia/bar_year_label')
 def bar_year_label():
     """Retourne une image montrant la moyenne du label par année."""
-    label = request.args.get('label', default='V 100m K72', type=str)
+    label = request.args.get('label', default='V100', type=str)
     fig = plot_bar_year_label(label)
     output = io.BytesIO()
     FigureCanvas(fig).print_png(output)
