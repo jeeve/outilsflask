@@ -145,18 +145,33 @@ def calcul_vitesses(gpx_url):
                 total_distance += cum_dist[-1]
 
                 # ── Vmax : meilleure vitesse sur fenêtre de 2 s (GP3S standard) ──
-                # Distance cumulée le long du parcours / temps de la fenêtre.
-                # On teste toutes les fenêtres de 2 à 6 s depuis chaque point.
+                # 1) Calcul d'une vitesse 2s par point (two-pointer)
+                # 2) Filtre médian glissant (fenêtre de 5) pour éliminer
+                #    les pics isolés dus au bruit GPS position
+                speeds_2s = []
+                j_vmax = 1
                 for i in range(n - 1):
-                    for j in range(i + 1, n):
-                        dt = rel_time[j] - rel_time[i]
-                        if dt > 6.0:
-                            break
-                        if dt >= 2.0:
-                            dist = cum_dist[j] - cum_dist[i]
-                            speed_kn = (dist / dt) * MS_TO_KNOTS
-                            if speed_kn <= FILTRE_VITESSE_KN and speed_kn > vmax:
-                                vmax = speed_kn
+                    if j_vmax <= i:
+                        j_vmax = i + 1
+                    while j_vmax < n - 1 and (rel_time[j_vmax] - rel_time[i]) < 2.0:
+                        j_vmax += 1
+                    if j_vmax >= n:
+                        break
+                    dt = rel_time[j_vmax] - rel_time[i]
+                    if dt >= 2.0:
+                        dist = cum_dist[j_vmax] - cum_dist[i]
+                        speeds_2s.append((dist / dt) * MS_TO_KNOTS)
+                    else:
+                        speeds_2s.append(0.0)
+
+                # Filtre médian glissant (fenêtre de 5 échantillons)
+                for i in range(len(speeds_2s)):
+                    lo = max(0, i - 2)
+                    hi = min(len(speeds_2s), i + 3)
+                    window = sorted(speeds_2s[lo:hi])
+                    median_speed = window[len(window) // 2]
+                    if median_speed <= FILTRE_VITESSE_KN and median_speed > vmax:
+                        vmax = median_speed
 
                 # ── Vmoy : un échantillon par point (fenêtre 2 s, two-pointer) ──
                 j_vmoy = 1
