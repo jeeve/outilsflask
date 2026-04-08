@@ -11,6 +11,7 @@ import os
 import json
 import base64
 import tempfile
+import math
 
 SHEET_ID = '1eCnnsOdcwRKJ_kpx1uS-XXJoJGFSvm3l3ez2K9PpPv4'
 CREDENTIALS_FILE = os.path.join(os.path.dirname(__file__), 'google', 'session-491110-c3945511c396.json')
@@ -64,8 +65,40 @@ def calcul_vitesses(gpx_url):
     total_distance = 0.0
 
     MS_TO_KNOTS = 1.94384
-    FILTRE_VITESSE_KN = 50     # seuil glitch GPS (nœuds) — assez haut pour ne pas couper les vraies pointes
     ACCELERATION_MAX = 4.0     # m/s² — accélération/décélération max réaliste
+    BEARING_THRESHOLD = 90     # degrés — changement de cap max à haute vitesse
+
+    # Seuil de glitch adaptatif : basé sur le P95 des vitesses instantanées.
+    # Un spike GPS dépasse largement les vitesses normales de la session.
+    raw_speeds_kn = []
+    for track in gpx.tracks:
+        for segment in track.segments:
+            pts = segment.points
+            for i in range(len(pts) - 1):
+                p1, p2 = pts[i], pts[i + 1]
+                if p1.time and p2.time:
+                    dt = (p2.time - p1.time).total_seconds()
+                    if 0 < dt < 60:
+                        spd = (p1.distance_2d(p2) / dt) * MS_TO_KNOTS
+                        if spd > 1.0:
+                            raw_speeds_kn.append(spd)
+    raw_speeds_kn.sort()
+    p95 = raw_speeds_kn[int(len(raw_speeds_kn) * 0.95)] if raw_speeds_kn else 30
+    FILTRE_VITESSE_KN = max(p95 * 1.5, 35)
+
+    def bearing(p1, p2):
+        """Cap en degrés de p1 vers p2."""
+        lat1 = math.radians(p1.latitude)
+        lat2 = math.radians(p2.latitude)
+        dlon = math.radians(p2.longitude - p1.longitude)
+        x = math.sin(dlon) * math.cos(lat2)
+        y = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(dlon)
+        return math.degrees(math.atan2(x, y)) % 360
+
+    def bearing_diff(b1, b2):
+        """Différence angulaire entre 2 caps (0-180)."""
+        d = abs(b1 - b2) % 360
+        return d if d <= 180 else 360 - d
 
     for track in gpx.tracks:
         for segment in track.segments:
@@ -74,18 +107,26 @@ def calcul_vitesses(gpx_url):
                 continue
 
             # ── Étape 1 : filtrage des glitchs GPS ──────────────────────
-            # Vitesses instantanées entre points consécutifs (m/s, None si invalide)
-            inst_speeds = []
+            # Pré-calcul vitesses et caps entre points consécutifs
+            inst_speeds = []   # m/s, None si invalide
+            bearings = []      # degrés, None si invalide
             for i in range(len(points) - 1):
                 p1, p2 = points[i], points[i + 1]
                 if p1.time and p2.time:
                     dt = (p2.time - p1.time).total_seconds()
-                    if 0 < dt < 60:
-                        inst_speeds.append(p1.distance_2d(p2) / dt)
+                    dist = p1.distance_2d(p2)
+                    if 0 < dt < 60 and dist > 0.5:
+                        inst_speeds.append(dist / dt)
+                        bearings.append(bearing(p1, p2))
+                    elif 0 < dt < 60:
+                        inst_speeds.append(dist / dt)
+                        bearings.append(None)
                     else:
                         inst_speeds.append(None)
+                        bearings.append(None)
                 else:
                     inst_speeds.append(None)
+                    bearings.append(None)
 
             valid_segments = []
             current_seg = []
@@ -114,6 +155,15 @@ def calcul_vitesses(gpx_url):
                             accel = abs(inst_speeds[i] - inst_speeds[i - 1]) / dt_accel
                             if accel > ACCELERATION_MAX:
                                 is_glitch = True
+
+                # Changement de cap brutal à haute vitesse = glitch GPS
+                # Un vrai virement prend plusieurs secondes et ralentit ;
+                # un saut GPS fait un aller-retour instantané à pleine vitesse.
+                if (i > 0 and i < len(bearings)
+                        and bearings[i - 1] is not None and bearings[i] is not None):
+                    min_spd = min(spd_prev, spd_next)
+                    if min_spd > 10 and bearing_diff(bearings[i - 1], bearings[i]) > BEARING_THRESHOLD:
+                        is_glitch = True
 
                 if not is_glitch:
                     current_seg.append(points[i])
@@ -145,35 +195,42 @@ def calcul_vitesses(gpx_url):
                 total_distance += cum_dist[-1]
 
                 # ── Vmax : meilleure vitesse sur fenêtre de 2 s (GP3S standard) ──
-                # 1) Calcul d'une vitesse 2s par point (two-pointer)
-                # 2) Filtre médian glissant (fenêtre de 5) pour éliminer
-                #    les pics isolés dus au bruit GPS position
+                # Distance en ligne droite (déplacement réel) pour éviter
+                # que les zigzags GPS gonflent la vitesse via la distance cumulée.
+                # Filtre médian (fenêtre 5) + validation vitesse soutenue (~20s).
                 speeds_2s = []
-                j_vmax = 1
                 for i in range(n - 1):
-                    if j_vmax <= i:
-                        j_vmax = i + 1
-                    while j_vmax < n - 1 and (rel_time[j_vmax] - rel_time[i]) < 2.0:
-                        j_vmax += 1
-                    if j_vmax >= n:
-                        break
-                    dt = rel_time[j_vmax] - rel_time[i]
-                    if dt >= 2.0:
-                        dist = cum_dist[j_vmax] - cum_dist[i]
-                        speeds_2s.append((dist / dt) * MS_TO_KNOTS)
-                    else:
-                        speeds_2s.append(0.0)
+                    best_spd = 0.0
+                    for j in range(i + 1, n):
+                        dt = rel_time[j] - rel_time[i]
+                        if dt > 6.0:
+                            break
+                        if dt >= 2.0:
+                            straight_dist = seg_pts[i].distance_2d(seg_pts[j])
+                            spd = (straight_dist / dt) * MS_TO_KNOTS
+                            if spd > best_spd:
+                                best_spd = spd
+                    speeds_2s.append(best_spd)
 
-                # Filtre médian glissant (fenêtre de 5 échantillons)
+                # Filtre médian glissant (fenêtre de 5)
+                smoothed = []
                 for i in range(len(speeds_2s)):
                     lo = max(0, i - 2)
                     hi = min(len(speeds_2s), i + 3)
                     window = sorted(speeds_2s[lo:hi])
-                    median_speed = window[len(window) // 2]
-                    if median_speed <= FILTRE_VITESSE_KN and median_speed > vmax:
-                        vmax = median_speed
+                    smoothed.append(window[len(window) // 2])
 
-                # ── Vmoy : un échantillon par point (fenêtre 2 s, two-pointer) ──
+                # Validation vitesse soutenue (contexte ±10 points ~20s)
+                for i in range(len(smoothed)):
+                    if smoothed[i] <= vmax or smoothed[i] > FILTRE_VITESSE_KN:
+                        continue
+                    lo = max(0, i - 10)
+                    hi = min(len(smoothed), i + 11)
+                    ctx_avg = sum(smoothed[lo:hi]) / (hi - lo)
+                    if ctx_avg >= smoothed[i] * 0.7:
+                        vmax = smoothed[i]
+
+                # ── Vmoy : un échantillon par point (fenêtre 2 s, distance ligne droite) ──
                 j_vmoy = 1
                 for i in range(n - 1):
                     if j_vmoy <= i:
@@ -184,13 +241,14 @@ def calcul_vitesses(gpx_url):
                         break
                     dt = rel_time[j_vmoy] - rel_time[i]
                     if dt >= 2.0:
-                        dist = cum_dist[j_vmoy] - cum_dist[i]
-                        speed_kn = (dist / dt) * MS_TO_KNOTS
+                        straight_dist = seg_pts[i].distance_2d(seg_pts[j_vmoy])
+                        speed_kn = (straight_dist / dt) * MS_TO_KNOTS
                         if speed_kn <= FILTRE_VITESSE_KN:
                             all_speeds_2s.append(speed_kn)
 
-                # ── V100 : meilleure vitesse sur run >= 100 m (two-pointer) ──
-                # Distance = distance cumulée le long du parcours (pas à vol d'oiseau).
+                # ── V100 : meilleure vitesse sur run >= 100 m ──
+                # Distance cumulée pour détecter les runs de 100 m,
+                # distance ligne droite pour calculer la vitesse.
                 j_v100 = 1
                 for i in range(n - 1):
                     if j_v100 <= i:
@@ -199,11 +257,11 @@ def calcul_vitesses(gpx_url):
                         j_v100 += 1
                     if j_v100 >= n:
                         break
-                    dist = cum_dist[j_v100] - cum_dist[i]
-                    if dist >= 100.0:
+                    if cum_dist[j_v100] - cum_dist[i] >= 100.0:
                         dt = rel_time[j_v100] - rel_time[i]
                         if dt > 0:
-                            speed_kn = (dist / dt) * MS_TO_KNOTS
+                            straight_dist = seg_pts[i].distance_2d(seg_pts[j_v100])
+                            speed_kn = (straight_dist / dt) * MS_TO_KNOTS
                             if speed_kn <= FILTRE_VITESSE_KN and speed_kn > max_v100:
                                 max_v100 = speed_kn
 
