@@ -59,6 +59,18 @@ def calcul_vitesses(gpx_url):
         print(f"  Erreur parsing GPX: {e}")
         return None
 
+    # Dédupliquer les points avec le même timestamp.
+    # Certains GPS enregistrent 2 positions à la même seconde,
+    # ce qui gonfle les distances et donc les vitesses calculées.
+    for track in gpx.tracks:
+        for segment in track.segments:
+            deduped = []
+            for pt in segment.points:
+                if deduped and pt.time and deduped[-1].time == pt.time:
+                    continue
+                deduped.append(pt)
+            segment.points = deduped
+
     all_speeds_2s = []          # échantillons de vitesse sur fenêtres 2 s
     vmax = 0.0
     max_v100 = 0.0
