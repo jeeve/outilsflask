@@ -79,6 +79,7 @@ def calcul_vitesses(gpx_url):
     MS_TO_KNOTS = 1.94384
     ACCELERATION_MAX = 4.0     # m/s² — accélération/décélération max réaliste
     BEARING_THRESHOLD = 90     # degrés — changement de cap max à haute vitesse
+    GLITCH_MARGIN = 2          # points écartés de part et d'autre d'un glitch
 
     # Seuil de glitch adaptatif : basé sur le P95 des vitesses instantanées.
     # Un spike GPS dépasse largement les vitesses normales de la session.
@@ -142,6 +143,7 @@ def calcul_vitesses(gpx_url):
 
             valid_segments = []
             current_seg = []
+            skip_after_glitch = 0
 
             for i in range(len(points)):
                 if not points[i].time:
@@ -177,12 +179,21 @@ def calcul_vitesses(gpx_url):
                     if min_spd > 10 and bearing_diff(bearings[i - 1], bearings[i]) > BEARING_THRESHOLD:
                         is_glitch = True
 
+                # Les points voisins d'un glitch sont eux aussi perturbés
+                # (la position "rattrape" le saut) : on les écarte aussi,
+                # sinon ils créent des pics en début/fin de segment où le
+                # filtre médian, tronqué, ne les élimine pas.
                 if not is_glitch:
-                    current_seg.append(points[i])
+                    if skip_after_glitch > 0:
+                        skip_after_glitch -= 1
+                    else:
+                        current_seg.append(points[i])
                 else:
+                    current_seg = current_seg[:-GLITCH_MARGIN]
                     if len(current_seg) >= 2:
                         valid_segments.append(current_seg)
                     current_seg = []
+                    skip_after_glitch = GLITCH_MARGIN
 
             if len(current_seg) >= 2:
                 valid_segments.append(current_seg)
