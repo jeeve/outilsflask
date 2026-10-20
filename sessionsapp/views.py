@@ -114,8 +114,9 @@ def upload_form():
     thread = threading.Thread(target=calculate_missing_speeds_async, daemon=True)
     thread.start()
     
-    # Afficher la page immédiatement
-    df = get_data()
+    # Afficher la page immédiatement, avec les données à jour du Google Sheet
+    # (sinon les sessions ajoutées depuis le démarrage du serveur n'apparaissent pas)
+    df = get_data(force_reload=True)
     df_windfoil = df[df['Pratique'].eq('Windfoil')]
     nb_points = df_windfoil.shape[0]
     total_km = df_windfoil['Distance (km)'].sum()
