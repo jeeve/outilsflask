@@ -193,9 +193,17 @@ def _windfoil(colonnes):
         df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
         df_windfoil['Year'] = df_windfoil['Date'].dt.year
     if 'Aile' in colonnes:
-        # extraction de la partie "aile" (avant le premier espace)
-        df_windfoil['Wing'] = df_windfoil['Aile'].astype(str).str.split().str[0]
+        df_windfoil['Wing'] = df_windfoil['Aile'].astype(str).map(_plus_petite_aile)
     return df_windfoil
+
+
+def _plus_petite_aile(aile):
+    """Taille de l'aile (partie avant le premier espace) ; si plusieurs ailes
+    séparées par « - » (ex. « 1050 R8 - 600 R8 »), retient la plus petite."""
+    tailles = [p.split()[0] for p in aile.split('-') if p.split()]
+    if not tailles:
+        return aile
+    return min(tailles, key=lambda t: float(t) if t.replace('.', '', 1).isdigit() else float('inf'))
 
 
 VENT_ORDER = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO']
