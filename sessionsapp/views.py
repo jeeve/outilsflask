@@ -178,6 +178,16 @@ def statistique_voile():
     return Response(output.getvalue(), mimetype='image/png')
 
 
+def _axe_sessions(fig, axis, dates, nb_libelles=40):
+    """Axe des abscisses en sessions équidistantes, libellées par leur date."""
+    pas = max(1, -(-len(dates) // nb_libelles))
+    positions = list(range(0, len(dates), pas))
+    axis.set_xticks(positions)
+    axis.set_xticklabels([dates.iloc[i].strftime('%d/%m/%Y') for i in positions], rotation=90)
+    axis.set_xlim(-1, len(dates))
+    fig.subplots_adjust(bottom=0.18)
+
+
 def plot_statistique_par_aile(label):
     """Trace l'évolution de la valeur `label` au fil du temps, une courbe par aile."""
     fig = Figure()
@@ -188,19 +198,18 @@ def plot_statistique_par_aile(label):
     df = get_data()
     df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=[label, 'Aile'])
     df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
+    # une position par session, dans l'ordre chronologique
+    df_windfoil = df_windfoil.sort_values('Date', kind='stable').reset_index(drop=True)
 
     # extraction de la partie "aile" (avant le premier espace)
     df_windfoil['Wing'] = df_windfoil['Aile'].astype(str).str.split().str[0]
 
     # tracer une ligne par aile
     for wing, grp in df_windfoil.groupby('Wing'):
-        axis.plot(grp['Date'], grp[label], 'o-', label=wing)
+        axis.plot(grp.index, grp[label], 'o-', label=wing)
 
     axis.set_ylabel(label)
-    axis.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1, 4, 7, 10]))
-    axis.xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
-    axis.tick_params(axis='x', labelrotation=90)
-    fig.subplots_adjust(bottom=0.15)
+    _axe_sessions(fig, axis, df_windfoil['Date'])
     axis.legend(title='Aile', loc='best')
     axis.grid(True, linestyle='--', linewidth=0.5, alpha=0.7)
 
@@ -216,16 +225,15 @@ def plot_statistique_par_voile(label):
     df = get_data()
     df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=[label, 'Voile'])
     df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
+    # une position par session, dans l'ordre chronologique
+    df_windfoil = df_windfoil.sort_values('Date', kind='stable').reset_index(drop=True)
 
     # tracer une ligne par voile (nom complet)
     for voile, grp in df_windfoil.groupby('Voile'):
-        axis.plot(grp['Date'], grp[label], 'o-', label=voile)
+        axis.plot(grp.index, grp[label], 'o-', label=voile)
 
     axis.set_ylabel(label)
-    axis.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1, 4, 7, 10]))
-    axis.xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
-    axis.tick_params(axis='x', labelrotation=90)
-    fig.subplots_adjust(bottom=0.15)
+    _axe_sessions(fig, axis, df_windfoil['Date'])
     axis.legend(title='Voile', loc='best')
     axis.grid(True, linestyle='--', linewidth=0.5, alpha=0.7)
 
