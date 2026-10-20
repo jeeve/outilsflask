@@ -5,6 +5,7 @@ Classes to convert FIT files to GPX, including tools to process Strava Bulk Expo
 import os
 import gzip
 import shutil
+import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from typing import Dict, Union, Optional, Tuple
 import pandas as pd
@@ -14,7 +15,9 @@ import fitdecode
 def parse_fit_to_gpx(fitname): 
     conv = Converter()     
     filename = fitname.replace('fit', 'gpx')  
-    gpx = conv.fit_to_gpx(f_in=fitname, f_out=filename)   
+    gpx = conv.fit_to_gpx(f_in=fitname, f_out=filename)
+
+GPXTPX_NS = 'http://www.garmin.com/xmlschemas/TrackPointExtension/v2'
 
 # MAIN CONVERTER CLASS
 class Converter:
@@ -139,12 +142,13 @@ class Converter:
 
     # Method adapted from: https://github.com/nidhaloff/gpx-converter/blob/master/gpx_converter/base.py
     def dataframe_to_gpx(self, df_points, col_lat='latitude', col_long='longitude', col_time=None, col_alt=None,
-                         gpx_name=None, gpx_desc=None, gpx_link=None, gpx_type=None):
+                         col_speed=None, gpx_name=None, gpx_desc=None, gpx_link=None, gpx_type=None):
         """
         Convert a pandas dataframe to gpx
         Parameters:
             df_points (pd.DataFrame): pandas dataframe containing at minimum lat and long info of points
             col_alt (str): name of the altitudes column
+            col_speed (str): name of the speed column (m/s), written as gpxtpx:speed extension
             col_time (str): name of the time column
             col_long (str): name of the longitudes column
             col_lat (str): name of the latitudes column
@@ -159,6 +163,8 @@ class Converter:
             cols_to_check.append(col_alt)
         if col_time:
             cols_to_check.append(col_time)
+        if col_speed:
+            cols_to_check.append(col_speed)
 
         if any(elem not in df_points.columns for elem in cols_to_check):
             raise KeyError("The input dataframe must consist of point coordinates in longitude and latitude. "
@@ -179,6 +185,9 @@ class Converter:
         gpx.tracks[0].description = gpx_desc if not pd.isna(gpx_desc) else None
         gpx.tracks[0].link = gpx_link
 
+        if col_speed:
+            gpx.nsmap['gpxtpx'] = GPXTPX_NS
+
         # Step 3: Add points from dataframe to GPX track:
         for idx in df_points.index:
             # Create trackpoint:
@@ -188,6 +197,12 @@ class Converter:
                 time=pd.Timestamp(df_points.loc[idx, col_time]) if col_time else None,
                 elevation=df_points.loc[idx, col_alt] if col_alt else None
             )
+
+            # Vitesse mesurée par l'appareil (Doppler sur les récepteurs GPS), en m/s
+            if col_speed and not pd.isna(df_points.loc[idx, col_speed]):
+                ext = ET.Element(f'{{{GPXTPX_NS}}}TrackPointExtension')
+                ET.SubElement(ext, f'{{{GPXTPX_NS}}}speed').text = f'{float(df_points.loc[idx, col_speed]):.3f}'
+                track_point.extensions.append(ext)
 
             # Append GPX_TrackPoint to segment:
             gpx_segment.points.append(track_point)
@@ -216,7 +231,7 @@ class Converter:
         enhanced_fields = ['altitude', 'speed']
         for field in enhanced_fields:
             if df_points[field].count() == 0 and df_points[f'enhanced_{field}'].count() > 0:
-                df_points[field].fillna(df_points[f'enhanced_{field}'], inplace=True)
+                df_points[field] = df_points[field].fillna(df_points[f'enhanced_{field}'])
 
         # Step 3: Convert pd.DataFrame to GPX
         gpx = self.dataframe_to_gpx(
@@ -225,6 +240,7 @@ class Converter:
             col_long='longitude',
             col_time='timestamp',
             col_alt='altitude',
+            col_speed='speed' if df_points['speed'].count() > 0 else None,
         )
 
         # Step 3: Save file
