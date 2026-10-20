@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ titre }}</title>
+    {{ js_resources|indent(4)|safe }}
+    {{ css_resources|indent(4)|safe }}
+    {{ plot_script|indent(4)|safe }}
+    <style>
+      body { margin: 16px; font-family: sans-serif; background: #fff; }
+      .graphique { height: calc(100vh - 70px); min-height: 400px; }
+      p.aide { color: #666; font-size: 13px; margin: 8px 0 0; }
+    </style>
+  </head>
+  <body>
+    <div class="graphique">{{ plot_div|indent(4)|safe }}</div>
+    <p class="aide">Molette : zoom &middot; Glisser : déplacer &middot; Clic sur la légende : masquer une série &middot; Bouton ↻ : vue complète</p>
+  </body>
+</html>
