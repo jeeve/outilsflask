@@ -34,13 +34,18 @@ MS_TO_KNOTS = 1.94384
 
 
 def _distance_km(lat1, lon1, lat2, lon2):
-    """Distance haversine en km (identique à GpxService.calculeDistance de visugpx)."""
-    R = 6371
-    dlat = math.radians(lat2 - lat1)
-    dlon = math.radians(lon2 - lon1)
-    a = (math.sin(dlat / 2) ** 2
-         + math.sin(dlon / 2) ** 2 * math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)))
-    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    """Distance en km sur l'ellipsoïde WGS84 (identique à GpxService.calculeDistance de visugpx) :
+    approximation plane locale avec les rayons de courbure à la latitude moyenne,
+    précise pour les distances de quelques km."""
+    A = 6378.137  # demi grand axe (km)
+    E2 = 0.00669437999014  # excentricité au carré
+    phi = math.radians((lat1 + lat2) / 2)
+    w = 1 - E2 * math.sin(phi) ** 2
+    rayon_meridien = A * (1 - E2) / w ** 1.5
+    rayon_normal = A / math.sqrt(w)
+    dy = math.radians(lat2 - lat1) * rayon_meridien
+    dx = math.radians(lon2 - lon1) * rayon_normal * math.cos(phi)
+    return math.hypot(dx, dy)
 
 
 def _vitesse_point(i, pts):
