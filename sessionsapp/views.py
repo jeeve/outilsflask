@@ -188,9 +188,6 @@ def plot_statistique_par_aile(label):
     df = get_data()
     df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=[label, 'Aile'])
     df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
-    df_windfoil['Date'] = (
-        df_windfoil['Date'] - pd.to_datetime('1/1/2019', format='%m/%d/%Y')
-    ).dt.days
 
     # extraction de la partie "aile" (avant le premier espace)
     df_windfoil['Wing'] = df_windfoil['Aile'].astype(str).str.split().str[0]
@@ -200,7 +197,10 @@ def plot_statistique_par_aile(label):
         axis.plot(grp['Date'], grp[label], 'o-', label=wing)
 
     axis.set_ylabel(label)
-    axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
+    axis.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1, 4, 7, 10]))
+    axis.xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
+    axis.tick_params(axis='x', labelrotation=90)
+    fig.subplots_adjust(bottom=0.15)
     axis.legend(title='Aile', loc='best')
     axis.grid(True, linestyle='--', linewidth=0.5, alpha=0.7)
 
@@ -216,16 +216,16 @@ def plot_statistique_par_voile(label):
     df = get_data()
     df_windfoil = df[df['Pratique'].eq('Windfoil')].dropna(subset=[label, 'Voile'])
     df_windfoil['Date'] = pd.to_datetime(df_windfoil['Date'], format='%m/%d/%Y')
-    df_windfoil['Date'] = (
-        df_windfoil['Date'] - pd.to_datetime('1/1/2019', format='%m/%d/%Y')
-    ).dt.days
 
     # tracer une ligne par voile (nom complet)
     for voile, grp in df_windfoil.groupby('Voile'):
         axis.plot(grp['Date'], grp[label], 'o-', label=voile)
 
     axis.set_ylabel(label)
-    axis.set_xlabel('Nombre de jours depuis le 01/01/2019')
+    axis.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1, 4, 7, 10]))
+    axis.xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
+    axis.tick_params(axis='x', labelrotation=90)
+    fig.subplots_adjust(bottom=0.15)
     axis.legend(title='Voile', loc='best')
     axis.grid(True, linestyle='--', linewidth=0.5, alpha=0.7)
 
