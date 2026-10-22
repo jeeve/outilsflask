@@ -8,6 +8,12 @@
     justify-content: center; /* alignement vertical */
   }
 
+  .descriptif {
+    font-style: italic;
+    opacity: 0.85;
+    margin: 0 0 10px 0;
+  }
+
   .loader {
     height: 50px;
     position: absolute;
@@ -20,6 +26,10 @@
 <br />
 <h3>{{ nb_points }} sessions Windfoil</h3>
 <h3>{{ "%.0f"|format(total_km) }} km parcourus</h3>
+<p class="descriptif">Seules les sessions de Windfoil sont prises en compte. Cliquer sur un graphique ouvre sa version interactive (zoom, infobulles, légende cliquable).</p>
+<br />
+<h2>Directions du vent par année</h2>
+<p class="descriptif">Nombre de sessions par année, chaque barre étant découpée selon l'orientation du vent (N, NNE, NE…). Permet de voir quels vents ont été les plus navigués chaque année.</p>
 <br />
 <div class="row">
   <div class="col-xs-12 col-sm-1 fond"></div>
@@ -31,6 +41,7 @@
 <br />
 <br />
 <h2>Répartition des sessions par spot</h2>
+<p class="descriptif">Nombre de sessions par année, découpé par spot : montre où les sessions ont eu lieu et comment cela évolue d'une année à l'autre.</p>
 <br />
 <div class="row">
   <div class="col-xs-12 col-sm-1 fond"></div>
@@ -42,6 +53,7 @@
 <br />
 <br />
 <h2>Nombre de km par spot</h2>
+<p class="descriptif">Distance totale parcourue (en km, calculée depuis les traces GPX) par année, découpée par spot.</p>
 <br />
 <div class="row">
   <div class="col-xs-12 col-sm-1 fond"></div>
@@ -53,6 +65,7 @@
 <br />
 <br />
 <h2>Ailes utilisées par année</h2>
+<p class="descriptif">Nombre de sessions par année et par taille d'aile de foil. Quand deux ailes ont été utilisées pendant une session, c'est la plus petite qui est retenue.</p>
 <br />
 <div class="row">
   <div class="col-xs-12 col-sm-1 fond"></div>
@@ -64,6 +77,7 @@
 <br />
 <br />
 <h2>Voiles utilisées par année</h2>
+<p class="descriptif">Nombre de sessions par année et par voile.</p>
 <br />
 <div class="row">
   <div class="col-xs-12 col-sm-1 fond"></div>
@@ -75,6 +89,7 @@
 <br />
 <br />
 <h2>Répartition des sessions par spot</h2>
+<p class="descriptif">Part de chaque spot dans le nombre total de sessions, toutes années confondues.</p>
 <br />
 <div class="row">
   <div class="col-xs-12 col-sm-1 fond"></div>
@@ -86,6 +101,7 @@
 <br />
 <br />
 <h2>Répartition des sessions par aile</h2>
+<p class="descriptif">Part de chaque taille d'aile dans le nombre total de sessions, toutes années confondues (la plus petite aile si deux ont été utilisées).</p>
 <br />
 <div class="row">
   <div class="col-xs-12 col-sm-1 fond"></div>
@@ -97,6 +113,7 @@
 <br />
 <br />
 <h2>Répartition des sessions par voile</h2>
+<p class="descriptif">Part de chaque voile dans le nombre total de sessions, toutes années confondues.</p>
 <br />
 <div class="row">
   <div class="col-xs-12 col-sm-1 fond"></div>
@@ -107,6 +124,9 @@
 
 <br />
 <br />
+<p class="descriptif">Les graphiques suivants portent sur la grandeur choisie ci-dessous, calculée depuis les traces GPX (vitesses en nœuds) :
+  <b>V 100m</b> = meilleure vitesse moyenne sur 100 m, <b>V Max</b> = meilleure vitesse sur 2 secondes,
+  <b>V moy</b> = vitesse moyenne de la session (hors arrêts et phases lentes), <b>Distance</b> = distance parcourue en km.</p>
 <div class="text-center">
   <select id="label" class="form-control" style="width: auto; display: inline-block; font-size: 16px;">
     <option value="V100">V 100m</option>
@@ -120,6 +140,7 @@
 <br />
 <br />
 <h2>Moyenne par année</h2>
+<p class="descriptif">Moyenne, sur toutes les sessions de chaque année, de la grandeur choisie : indique la progression d'une saison à l'autre.</p>
 <br />
 <div class="row">
   <div class="col-xs-12 col-sm-1 fond"></div>
@@ -131,6 +152,7 @@
 <br />
 <br />
 <h2>Statistique par aile</h2>
+<p class="descriptif">Valeur de la grandeur choisie pour chaque session, dans l'ordre chronologique (sessions espacées régulièrement, libellées par leur date), avec une courbe par taille d'aile pour comparer les ailes entre elles.</p>
 <br />
 <div class="row">
   <div class="col-xs-12 col-sm-1 fond"></div>
@@ -142,6 +164,7 @@
 <br />
 <br />
 <h2>Statistique par voile</h2>
+<p class="descriptif">Même principe que ci-dessus, avec une courbe par voile.</p>
 <br />
 <div class="row">
   <div class="col-xs-12 col-sm-1 fond"></div>
